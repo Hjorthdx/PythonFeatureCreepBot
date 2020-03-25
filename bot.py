@@ -5,7 +5,7 @@ import pymongo
 # GIV 2x NEDDUT HVIS MAN OPDUTTER SIG SELV
 
 # Discord bot token
-TOKEN = 'NjkwNTM0MDI4MzE0NjczMTUy.XntpRg.Qy9VFWWjWq-o9ykocFlo6wi90SM'
+TOKEN = 'NjkwNTM0MDI4MzE0NjczMTUy.Xntwzg.myJ9G0QVj61wGmEmpYa3zXW-Noo'
 
 myClient = pymongo.MongoClient("mongodb://localhost:27017")
 mydb = myClient["mydatabase"]
@@ -45,6 +45,7 @@ def addOpdut(authorID):
             { "Name": "Hjorth" },
             { "$inc": {"Opdutter": 1}}
         )
+        print("add opdut")
     elif authorID == '103033943464353792':
         mycol.update_one(
             { "Name": "Martin" },
@@ -88,6 +89,7 @@ def removeOpdut(authorID):
             { "Name": "Hjorth" },
             { "$inc": {"Opdutter": -1}}
         )
+        print("remove opdut")
     # MARTIN
     elif authorID == '103033943464353792':
         mycol.update_one(
@@ -213,7 +215,7 @@ async def on_raw_reaction_add(payload):
             print ("I'm called opdut add")
             addOpdut(authorID)
         # Kurt disapproved
-        if payload.emoji.id == 692384748957466634:
+        elif payload.emoji.id == 692383858871500860:
             message = await client.http.get_message(payload.channel_id, payload.message_id) # Dictionary
             authorDict = message["author"]
             authorID = authorDict["id"] # String
@@ -231,7 +233,7 @@ async def on_raw_reaction_remove(payload):
             print ("I'm called opdut remove")
             removeOpdut(authorID)
         # Kurt disapproved
-        elif payload.emoji.id == 619105859615719434:
+        elif payload.emoji.id == 692383858871500860:
             message = await client.http.get_message(payload.channel_id, payload.message_id) # Dictionary
             authorDict = message["author"]
             authorID = authorDict["id"] # String
