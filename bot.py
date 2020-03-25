@@ -45,24 +45,9 @@ else:
 
 client = discord.Client()
 
-
-# THIS DOES NOT REACT TO ALL MESSAGES, SO IF 
-# REACTION IS ADDED AND ITS NOT MOST RECENT MESSAGE
-# IT WILL NOT GET CALLED. FIXED WITH on_raw_reaction_add.
-#@client.event
-#async def on_reaction_add(reaction, user):
-#    if reaction.emoji.name == ":Eike:619148015470510090":
-#        print('found in first if')
-#    elif reaction.emoji.id == 619148015470510090: # THISS WORKS
-#        print('found in second if')
-#    elif reaction.emoji.name == "<:Eike:619148015470510090>":
-#        print('found in third if')
-#    elif reaction.emoji.name == ":Eike:":
-#        print('found in fourth if')
-#    print(reaction)
-#    print(reaction.message)
-#    print(reaction.message.content)
-
+# Needs to a discord.utily.find to find the message.
+# Once the message is found determine the user and call
+# the add karma function that isnt implemented yet.
 @client.event
 async def on_raw_reaction_add(payload):
     # Is it migmig room ?
@@ -75,9 +60,7 @@ async def on_raw_reaction_add(payload):
             print("Kurt disapproved found, +1 neddut")
 
 
-# Is just for testing purposes right now.
-# Will be changed to if !karma, then tell the user
-# the current value of the karma (Opdutter og neddutter).
+
 @client.event
 async def on_message(message):
     print(message)
