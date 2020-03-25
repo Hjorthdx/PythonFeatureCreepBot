@@ -1,20 +1,37 @@
-# bot.py
 import os
 import discord
 import asyncio
 import pymongo
 
+
+# THINGS TO REMEMBER
+# <:kurtApproved:619818932475527210>
+# <:kurtDisapproved:651028634945060864>
+
+# BUGS TO FIX
+# User can just remove reaction and then react again
+# to completely manipulate karma on the server.
+
+
+# Discord bot token
 TOKEN = 'NjkwNTM0MDI4MzE0NjczMTUy.XnS0Gw.C7h7bJETMXueU8WHv2saMqT44JQ'
 
+
+# Connects to mongo db @ localhost
+# Creates a database and collection with assigned names,
+# if they do not already exist in the database.
 myClient = pymongo.MongoClient("mongodb://localhost:27017")
 mydb = myClient["mydatabase"]
 mycol = mydb["UserKarma"]
 
-# Måske er et dictionary bedre for så kan jeg tilgå direkte til det element jeg gerne vil finde
-# Bare ved at bruge keyword ( deres navn ), og så kan jeg opdatere værdien
-# Jeg kan ikke helt lure hvordan jeg skulle gøre det nu, nu når jeg bare har et langt array.
-# Men det er også sent, så måske virker min hjerne bare ikke mere.
-karmaList = [
+
+# Checks if there is any documents in the database,
+# If there isn't, then it adds all the users and print their ids.
+if mycol.find():
+    # Do nothing
+    print('Found documents')
+else:
+    karmaList = [
     {"Name": "Adil", "Opdutter": 0, "Neddutter": 0},
     {"Name": "Chrille", "Opdutter": 0, "Neddutter": 0},
     {"Name": "Hjorth", "Opdutter": 0, "Neddutter": 0},
@@ -22,56 +39,60 @@ karmaList = [
     {"Name": "Magnus", "Opdutter": 0, "Neddutter": 0},
     {"Name": "Simon", "Opdutter": 0, "Neddutter": 0},
     {"Name": "Sten", "Opdutter": 0, "Neddutter": 0}
-]
-
-karmaDict = {
-    "Adil": 0,
-    "Chrille": 0,
-    "Hjorth": 0,
-    "Martin": 0,
-    "Magnus": 0,
-    "Simon": 0,
-    "Sten": 0
-}
-
-x = mycol.insert_many(karmaList)
-print(x.inserted_ids)
+    ]
+    x = mycol.insert_many(karmaList)
+    print(x.inserted_ids)
 
 client = discord.Client()
 
-#async def update_karma():
-    #await client.wait_until_ready()
-    #while not client.is_closed():
-    #    try:
-     #       with open("karma.txt", "a") as f:
-     #           for x, y in karmaDict.items():
-     #               f.write(f"{x}: {y}\n")
-     #       await asyncio.sleep(5) # Do 10 minutes later 600
-    #    except Exception as e:
-    #        print(e)
 
+# THIS DOES NOT REACT TO ALL MESSAGES, SO IF 
+# REACTION IS ADDED AND ITS NOT MOST RECENT MESSAGE
+# IT WILL NOT GET CALLED. FIXED WITH on_raw_reaction_add.
+#@client.event
+#async def on_reaction_add(reaction, user):
+#    if reaction.emoji.name == ":Eike:619148015470510090":
+#        print('found in first if')
+#    elif reaction.emoji.id == 619148015470510090: # THISS WORKS
+#        print('found in second if')
+#    elif reaction.emoji.name == "<:Eike:619148015470510090>":
+#        print('found in third if')
+#    elif reaction.emoji.name == ":Eike:":
+#        print('found in fourth if')
+#    print(reaction)
+#    print(reaction.message)
+#    print(reaction.message.content)
+
+@client.event
+async def on_raw_reaction_add(payload):
+    # Is it migmig room ?
+    if payload.channel_id == 619105859615719434:
+        # Kurt approved
+        if payload.emoji.id == 619818932475527210:
+            print("Kurt approved found, +1 opdut")
+        # Kurt disapproved
+        elif payload.emoji.id == 651028634945060864:
+            print("Kurt disapproved found, +1 neddut")
+
+
+# Is just for testing purposes right now.
+# Will be changed to if !karma, then tell the user
+# the current value of the karma (Opdutter og neddutter).
 @client.event
 async def on_message(message):
     print(message)
-
     # Hidden easter egg for the boys
     if message.channel != 690538239433506816 and message.author != client.user and message.content == "!karma":
         await message.channel.send('Botten er så tæt på at være færdig :pinching_hand:')
-
     # SØREN
     if message.author.id == 140195461519769601:
-        #query = {"Name": {"Hjorth"}}
-        #val = 0
-        #new = {"$set": {"Opdutter": val}} # Last "" I need to figure out a way to ++ that bitch
-
-        #x = mycol.update_one(query, new)
-
-        x = mycol.find({}, {"Name": "Hjorth"})
+        mycol.update_one(
+            { "Name": "Hjorth" },
+            { "$inc": {"Opdutter": 1}}
+        )
+        x = mycol.find_one({"Name": "Hjorth"})
         print(x)
-
-
         # await message.channel.send('Hjorth texted')
-
         print("KARMA ADDED TO HJORTH")
     # CHRILLE
     elif message.author.id == 279307446009462784:
@@ -92,8 +113,12 @@ async def on_message(message):
     
     ## MANGLER STEN OG ADIL
 
+# When the bot succesfully joins the discord server.
 @client.event
 async def on_ready():
     print(f'{client.user} has connected to Discord!')
+
+    for document in mycol.find():
+        print(document)
 
 client.run(TOKEN)
