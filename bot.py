@@ -1,36 +1,17 @@
 import os
 import discord
-import asyncio
 import pymongo
 
-
-# THINGS TO REMEMBER
-# <:kurtApproved:619818932475527210>
-# <:kurtDisapproved:651028634945060864>
-
-# BUGS TO FIX
-# User can just remove reaction and then react again
-# to completely manipulate karma on the server.
-
+# GIV 2x NEDDUT HVIS MAN OPDUTTER SIG SELV
 
 # Discord bot token
 TOKEN = 'NjkwNTM0MDI4MzE0NjczMTUy.XnS0Gw.C7h7bJETMXueU8WHv2saMqT44JQ'
 
-
-# Connects to mongo db @ localhost
-# Creates a database and collection with assigned names,
-# if they do not already exist in the database.
 myClient = pymongo.MongoClient("mongodb://localhost:27017")
 mydb = myClient["mydatabase"]
 mycol = mydb["UserKarma"]
 
-
-# Checks if there is any documents in the database,
-# If there isn't, then it adds all the users and print their ids.
-if mycol.find():
-    # Do nothing
-    print('Found documents')
-else:
+if not mycol.find():
     karmaList = [
     {"Name": "Adil", "Opdutter": 0, "Neddutter": 0},
     {"Name": "Chrille", "Opdutter": 0, "Neddutter": 0},
@@ -45,56 +26,167 @@ else:
 
 client = discord.Client()
 
-# Needs to a discord.utily.find to find the message.
-# Once the message is found determine the user and call
-# the add karma function that isnt implemented yet.
-@client.event
-async def on_raw_reaction_add(payload):
-    # Is it migmig room ?
-    if payload.channel_id == 619105859615719434:
-        # Kurt approved
-        if payload.emoji.id == 619818932475527210:
-            print("Kurt approved found, +1 opdut")
-        # Kurt disapproved
-        elif payload.emoji.id == 651028634945060864:
-            print("Kurt disapproved found, +1 neddut")
-
-
-
-@client.event
-async def on_message(message):
-    print(message)
-    # Hidden easter egg for the boys
-    if message.channel != 690538239433506816 and message.author != client.user and message.content == "!karma":
-        await message.channel.send('Botten er så tæt på at være færdig :pinching_hand:')
-    # SØREN
-    if message.author.id == 140195461519769601:
+def addKarma(authorID):
+    # ADIL
+    if authorID == '100552145421467648':
+        mycol.update_one(
+            { "Name": "Adil" },
+            { "$inc": {"Opdutter": 1}}
+        )
+        x = mycol.find_one({"Name": "Adil"})
+    # CHRILLE
+    elif authorID == '279307446009462784':
+        mycol.update_one(
+            { "Name": "Chrille" },
+            { "$inc": {"Opdutter": 1}}
+        )
+        x = mycol.find_one({"Name": "Chrille"})
+    # HJORTH
+    if authorID == '140195461519769601':
         mycol.update_one(
             { "Name": "Hjorth" },
             { "$inc": {"Opdutter": 1}}
         )
         x = mycol.find_one({"Name": "Hjorth"})
         print(x)
-        # await message.channel.send('Hjorth texted')
         print("KARMA ADDED TO HJORTH")
+    # MARTIN
+    elif authorID == '103033943464353792':
+        mycol.update_one(
+            { "Name": "Martin" },
+            { "$inc": {"Opdutter": 1}}
+        )
+    # MAGNUS 
+    elif authorID == '272507977984901120':
+        mycol.update_one(
+            { "Name": "Magnus" },
+            { "$inc": {"Opdutter": 1}}
+        )
+    # SIMON 
+    elif authorID == '619105357473775636':
+        mycol.update_one(
+            { "Name": "Simon" },
+            { "$inc": {"Opdutter": 1}}
+        )
+    #STEN
+    elif authorID == '502882469721407509':
+        mycol.update_one(
+            { "Name": "Sten" },
+            { "$inc": {"Opdutter": 1}}
+        )
+
+def removeKarma(authorID):
+    # ADIL
+    if authorID == '100552145421467648':
+        mycol.update_one(
+            { "Name": "Adil" },
+            { "$inc": {"Opdutter": -1}}
+        )
     # CHRILLE
-    elif message.author.id == 279307446009462784:
-        #karmaDict['Chrille'] += 1
-        print("KARMA ADDED TO CHRILLE")
-    # LØNNE
-    elif message.author.id == 103033943464353792:
-        #karmaDict['Martin'] += 1
-        print("KARMA ADDED TO LØNNE")
-    # MAGNUS
-    elif message.author.id == 272507977984901120:
-        #karmaDict['Magnus'] += 1
-        print("KARMA ADDED TO MAGNUS")
+    elif authorID == '279307446009462784':
+        mycol.update_one(
+            { "Name": "Chrille" },
+            { "$inc": {"Opdutter": -1}}
+        )
+    # HJORTH
+    if authorID == '140195461519769601':
+        mycol.update_one(
+            { "Name": "Hjorth" },
+            { "$inc": {"Opdutter": -1}}
+        )
+    # MARTIN
+    elif authorID == '103033943464353792':
+        mycol.update_one(
+            { "Name": "Martin" },
+            { "$inc": {"Opdutter": -1}}
+        )
+    # MAGNUS 
+    elif authorID == '272507977984901120':
+        mycol.update_one(
+            { "Name": "Magnus" },
+            { "$inc": {"Opdutter": -1}}
+        )
     # SIMON
-    elif message.author.id == 619094316106907658:
-        #karmaDict['Simon'] += 1
-        print("KARMA ADDED TO SIMON")
-    
-    ## MANGLER STEN OG ADIL
+    elif authorID == '619094316106907658':
+        mycol.update_one(
+            { "Name": "Simon" },
+            { "$inc": {"Opdutter": -1}}
+        )
+    #STEN
+    elif authorID == '502882469721407509':
+        mycol.update_one(
+            { "Name": "Sten" },
+            { "$inc": {"Opdutter": -1}}
+        )
+
+@client.event
+async def on_raw_reaction_add(payload):
+    if payload.channel_id == 619105859615719434:
+        # Kurt approved
+        if payload.emoji.id == 619818932475527210:
+            message = await client.http.get_message(payload.channel_id, payload.message_id) # Dictionary
+            authorDict = message["author"]
+            authorID = authorDict["id"] # String
+            addKarma(authorID)
+        # Kurt disapproved
+        elif payload.emoji.id == 619105859615719434:
+            message = await client.http.get_message(payload.channel_id, payload.message_id) # Dictionary
+            authorDict = message["author"]
+            authorID = authorDict["id"] # String
+            removeKarma(authorID)
+
+@client.event
+async def on_raw_reaction_remove(payload):
+    if payload.channel_id == 619105859615719434:
+        # Kurt approved
+        if payload.emoji.id == 619818932475527210:
+            message = await client.http.get_message(payload.channel_id, payload.message_id) # Dictionary
+            authorDict = message["author"]
+            authorID = authorDict["id"] # String
+            removeKarma(authorID)
+        # Kurt disapproved
+        elif payload.emoji.id == 619105859615719434:
+            message = await client.http.get_message(payload.channel_id, payload.message_id) # Dictionary
+            authorDict = message["author"]
+            authorID = authorDict["id"] # String
+            addKarma(authorID)
+
+@client.event
+async def on_message(message):
+    if message.content == "!karma":
+        # ADIL
+        if message.author.id == 100552145421467648:
+            x = mycol.find_one({"Name": "Adil"})
+            await message.channel.send('{} has {} opdutter'.format(x["Name"], x["Opdutter"]))
+        # CHRILLE
+        elif message.author.id == 279307446009462784:
+            x = mycol.find_one({"Name": "Chrille"})
+            await message.channel.send('{} has {} opdutter'.format(x["Name"], x["Opdutter"]))
+        # HJORTH
+        if message.author.id == 140195461519769601:
+            x = mycol.find_one({"Name": "Hjorth"})
+            await message.channel.send('{} has {} opdutter'.format(x["Name"], x["Opdutter"]))
+        # MARTIN
+        elif message.author.id == 103033943464353792:
+            x = mycol.find_one({"Name": "Martin"})
+            await message.channel.send('{} has {} opdutter'.format(x["Name"], x["Opdutter"]))
+        # MAGNUS 
+        elif message.author.id == 272507977984901120:
+            x = mycol.find_one({"Name": "Magnus"})
+            await message.channel.send('{} has {} opdutter'.format(x["Name"], x["Opdutter"]))
+        # SIMON
+        elif message.author.id == 619105357473775636:
+            x = mycol.find_one({"Name": "Simon"})
+            await message.channel.send('{} has {} opdutter'.format(x["Name"], x["Opdutter"]))
+        #STEN
+        elif message.author.id == 502882469721407509:
+            x = mycol.find_one({"Name": "Sten"})
+            await message.channel.send('{} has {} opdutter'.format(x["Name"], x["Opdutter"]))
+
+    # Hidden easter egg for the boys
+    if message.content == "!bot":
+        await message.channel.send('Botten er så tæt på at være færdig :pinching_hand:')
+
 
 # When the bot succesfully joins the discord server.
 @client.event
