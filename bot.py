@@ -5,7 +5,7 @@ import pymongo
 # GIV 2x NEDDUT HVIS MAN OPDUTTER SIG SELV
 
 # Discord bot token
-TOKEN = 'NjkwNTM0MDI4MzE0NjczMTUy.Xntwzg.myJ9G0QVj61wGmEmpYa3zXW-Noo'
+TOKEN = 'NjkwNTM0MDI4MzE0NjczMTUy.XntyRg.hAz8jUl9XUKm7_yAB1UsFeh5uf0'
 
 myClient = pymongo.MongoClient("mongodb://localhost:27017")
 mydb = myClient["mydatabase"]
@@ -45,7 +45,7 @@ def addOpdut(authorID):
             { "Name": "Hjorth" },
             { "$inc": {"Opdutter": 1}}
         )
-        print("add opdut")
+    # MARTIN
     elif authorID == '103033943464353792':
         mycol.update_one(
             { "Name": "Martin" },
@@ -89,7 +89,6 @@ def removeOpdut(authorID):
             { "Name": "Hjorth" },
             { "$inc": {"Opdutter": -1}}
         )
-        print("remove opdut")
     # MARTIN
     elif authorID == '103033943464353792':
         mycol.update_one(
@@ -134,7 +133,7 @@ def addNeddut(authorID):
             { "Name": "Hjorth" },
             { "$inc": {"Neddutter": 1}}
         )
-        print ("add neddut")
+    # MARTIN
     elif authorID == '103033943464353792':
         mycol.update_one(
             { "Name": "Martin" },
@@ -178,7 +177,7 @@ def removeNeddut(authorID):
             { "Name": "Hjorth" },
             { "$inc": {"Neddutter": -1}}
         )
-        print ("remove neddut")
+    # MARTIN
     elif authorID == '103033943464353792':
         mycol.update_one(
             { "Name": "Martin" },
@@ -206,38 +205,34 @@ def removeNeddut(authorID):
 
 @client.event
 async def on_raw_reaction_add(payload):
-    #if payload.channel_id == 619105859615719434:
+    if payload.channel_id == 619105859615719434:
         # Kurt approved  
         if payload.emoji.id == 619818932475527210:
             message = await client.http.get_message(payload.channel_id, payload.message_id) # Dictionary
             authorDict = message["author"]
             authorID = authorDict["id"] # String
-            print ("I'm called opdut add")
             addOpdut(authorID)
         # Kurt disapproved
-        elif payload.emoji.id == 692383858871500860:
+        elif payload.emoji.id == 651028634945060864:
             message = await client.http.get_message(payload.channel_id, payload.message_id) # Dictionary
             authorDict = message["author"]
             authorID = authorDict["id"] # String
-            print ("I'm called neddut add")
             addNeddut(authorID)
             
 @client.event
 async def on_raw_reaction_remove(payload):
-    #if payload.channel_id == 619105859615719434:
+    if payload.channel_id == 619105859615719434:
         # Kurt approved
         if payload.emoji.id == 619818932475527210:
             message = await client.http.get_message(payload.channel_id, payload.message_id) # Dictionary
             authorDict = message["author"]
             authorID = authorDict["id"] # String
-            print ("I'm called opdut remove")
             removeOpdut(authorID)
         # Kurt disapproved
-        elif payload.emoji.id == 692383858871500860:
+        elif payload.emoji.id == 651028634945060864:
             message = await client.http.get_message(payload.channel_id, payload.message_id) # Dictionary
             authorDict = message["author"]
             authorID = authorDict["id"] # String
-            print ("I'm called neddut remove")
             removeNeddut(authorID)
 
 @client.event
