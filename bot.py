@@ -2,10 +2,8 @@ import os
 import discord
 import pymongo
 
-# GIV 2x NEDDUT HVIS MAN OPDUTTER SIG SELV
-
 # Discord bot token
-TOKEN = 'NjkwNTM0MDI4MzE0NjczMTUy.XntyRg.hAz8jUl9XUKm7_yAB1UsFeh5uf0'
+TOKEN = 'NjkwNTM0MDI4MzE0NjczMTUy.XnyZ8w.bsIKcj_Azvy_72aWp_Iv3wNS7TI'
 
 myClient = pymongo.MongoClient("mongodb://localhost:27017")
 mydb = myClient["mydatabase"]
@@ -209,16 +207,27 @@ async def on_raw_reaction_add(payload):
         # Kurt approved  
         if payload.emoji.id == 619818932475527210:
             message = await client.http.get_message(payload.channel_id, payload.message_id) # Dictionary
+            reactUserID = payload.user_id
+            strUerID = str(reactUserID)
             authorDict = message["author"]
             authorID = authorDict["id"] # String
-            addOpdut(authorID)
+
+            # If user upvotes his own post
+            if strUerID == authorID:
+                # Should it be -opdut or +neddut?
+                removeOpdut(authorID)
+                removeOpdut(authorID)
+            else:
+                addOpdut(authorID)
         # Kurt disapproved
         elif payload.emoji.id == 651028634945060864:
             message = await client.http.get_message(payload.channel_id, payload.message_id) # Dictionary
             authorDict = message["author"]
             authorID = authorDict["id"] # String
             addNeddut(authorID)
-            
+
+# Should it be possible to remove your own upvote to your own post?
+# Or should the karma whores stay punished?
 @client.event
 async def on_raw_reaction_remove(payload):
     if payload.channel_id == 619105859615719434:
