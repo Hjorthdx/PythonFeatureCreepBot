@@ -3,6 +3,7 @@ import discord
 import pymongo
 import User
 import Db
+import Pomodoro
 
 # TODO
 # The enviorement file does not work either, so the bot token needs to be refreshed each time it is pushed to git
@@ -10,7 +11,7 @@ import Db
 # Add another collection in the database to track how long we are working for, just like lønnes ui in his 
 
 # Discord bot token
-TOKEN = 'NjkwNTM0MDI4MzE0NjczMTUy.XnzZBA.T6dNTt6mkHRr2kxLZXfFZUYBscc'
+TOKEN = 'NjkwNTM0MDI4MzE0NjczMTUy.XnzdwQ.xyP92St3lGIaA5IuIGNwHkCJ3lw'
 
 # Emotes
 kurtApproved = 619818932475527210
@@ -92,7 +93,21 @@ async def on_message(message):
             if message.author.id == user.intUserID:
                 x = Db.mycol.find_one({ "Name": user.name })
                 await message.channel.send('{} has {} total karma. {} opdutter and {} neddutter'.format(x["Name"], x["Opdutter"] - x["Neddutter"], x["Opdutter"], x["Neddutter"]))
+    
+
+    # No checks at the moment, so will likely break with wrong inputs from user.
+    if "!pomodoro" in message.content:
+        # Maybe if user is certain role on discord, so not everyone can fuck with this.
+
+        # This entire part is coded based on Kurts saying, I wish this was here.
+        x = message.content
+        string_pomodoro_time = x[10:]
+        string_break_time = x[-2:]
+        pomodoro_time = int(string_pomodoro_time)
+        break_time = int(string_break_time)
+        Pomodoro.startPomodoro(pomodoro_time, break_time)
         
+
     # Hidden easter egg for the boys
     if message.content == "!bot":
         await message.channel.send('Botten er så tæt på at være færdig :pinching_hand:')
