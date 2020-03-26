@@ -30,7 +30,3 @@ class User:
             { "Name": self.name },
             { "$inc": {"Neddutter": -1}}
         )
-
-
-# TODO
-# Needs methods that adds and removes opdutter and neddutter, so the bot.py is a lot nicer looking
