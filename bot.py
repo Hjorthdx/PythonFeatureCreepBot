@@ -3,15 +3,15 @@ import discord
 import pymongo
 import User
 import Db
-import Pomodoro
+import threading
+import time
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # TODO
-# The enviorement file does not work either, so the bot token needs to be refreshed each time it is pushed to git
 # Add pomodoro timer
 # Add another collection in the database to track how long we are working for, just like lønnes ui in his 
-
-# Discord bot token
-TOKEN = 'NjkwNTM0MDI4MzE0NjczMTUy.XnzdwQ.xyP92St3lGIaA5IuIGNwHkCJ3lw'
 
 # Emotes
 kurtApproved = 619818932475527210
@@ -93,20 +93,28 @@ async def on_message(message):
             if message.author.id == user.intUserID:
                 x = Db.mycol.find_one({ "Name": user.name })
                 await message.channel.send('{} has {} total karma. {} opdutter and {} neddutter'.format(x["Name"], x["Opdutter"] - x["Neddutter"], x["Opdutter"], x["Neddutter"]))
-    
+
 
     # No checks at the moment, so will likely break with wrong inputs from user.
     if "!pomodoro" in message.content:
         # Maybe if user is certain role on discord, so not everyone can fuck with this.
 
         # This entire part is coded based on Kurts saying, I wish this was here.
-        x = message.content
-        string_pomodoro_time = x[10:]
-        string_break_time = x[-2:]
-        pomodoro_time = int(string_pomodoro_time)
-        break_time = int(string_break_time)
-        Pomodoro.startPomodoro(pomodoro_time, break_time)
-        
+        #x = message.content
+        #string_pomodoro_time = x[10:]
+        #string_break_time = x[-2:]
+        #pomodoro_time = int(string_pomodoro_time)
+        #break_time = int(string_break_time)
+        #Pomodoro.startPomodoro(pomodoro_time, break_time)
+        #t = Pomodoro.PomodoroTimer(10,Pomodoro.printer())
+        #t.start()
+
+        #timerThread = threading.Thread(target = test_method())
+        #timerThread.start()
+        t = threading.Timer(15.0, test_method())
+        t.start()
+
+
 
     # Hidden easter egg for the boys
     if message.content == "!bot":
@@ -119,4 +127,10 @@ async def on_ready():
     for document in Db.mycol.find():
         print(document)
 
-client.run(TOKEN)
+
+def test_method():
+    print("TEST")
+    time.sleep(1)
+    
+
+client.run(os.getenv("TOKEN"))
