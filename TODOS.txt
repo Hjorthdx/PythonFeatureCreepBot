@@ -1,0 +1,11 @@
+# TODO
+Bot skal forlade rummet selv efter mp3 fil er slut eller ved command måske
+!play latex bastards
+!play bamse
+!play pomodoro lyd start/slut
+Hele projektet skal flyttes til virtuel maskine
+Database skal sættes op til at være online - lav prio
+Pomodoro skal færdiglaves - threading virker though
+Pomodoro default timers hvis andet ikke er specified
+
+:)
