@@ -1,15 +1,16 @@
-import time
-import datetime as dt
+import threading
+import bot
 
-def startPomodoro(pomodoro_time, break_time):
-    print("Pomodoro started")
-    start_time = dt.datetime.now()
-    pomodoro_time = pomodoro_time
-    time_delta = dt.timedelta(0,pomodoro_time)
-    pomodoro_end_time = start_time + time_delta
-    break_time = break_time
+def start(workLength, breakLength, channel):
+    workTimer = threading.Timer(workLength, printer(channel))
+    breakTimer = threading.Timer(workLength + breakLength, printer2)
+    workTimer.start()
+    breakTimer.start()
 
-    if start_time < pomodoro_end_time:
-        print("Currently working")
 
+def printer(channel):
+    print("a")
+
+def printer2():
+    print("Break done")
 

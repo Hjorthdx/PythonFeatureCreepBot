@@ -1,11 +1,7 @@
-import os
-import discord
-import pymongo
-import User
-import Db
-import threading
-import time
+import os, discord, pymongo, User, Db, threading, time
 from dotenv import load_dotenv
+
+import Pomodoro
 
 load_dotenv()
 
@@ -97,28 +93,23 @@ async def on_message(message):
 
     # No checks at the moment, so will likely break with wrong inputs from user.
     if "!pomodoro" in message.content:
-        # Maybe if user is certain role on discord, so not everyone can fuck with this.
+        StringWorkLength = message.content[10:12]
+        StringBreakLength = message.content[13:15]
+        workLength = int(StringWorkLength)
+        breakLength = int(StringBreakLength)
+        
+        Pomodoro.start(workLength, breakLength, message.channel)
 
-        # This entire part is coded based on Kurts saying, I wish this was here.
-        #x = message.content
-        #string_pomodoro_time = x[10:]
-        #string_break_time = x[-2:]
-        #pomodoro_time = int(string_pomodoro_time)
-        #break_time = int(string_break_time)
-        #Pomodoro.startPomodoro(pomodoro_time, break_time)
-        #t = Pomodoro.PomodoroTimer(10,Pomodoro.printer())
-        #t.start()
-
-        #timerThread = threading.Thread(target = test_method())
-        #timerThread.start()
-        t = threading.Timer(15.0, test_method())
-        t.start()
-
+    if "!play" in message.content:
+        channel = client.get_channel(619094316106907662)
+        vc = await channel.connect()
+        vc.play(discord.FFmpegPCMAudio(executable="E:/Program Files (x86)/ffmpeg/bin/ffmpeg.exe", source="C:/Users/Hjorth/Documents/GitHub/DiscordKarmaBot/mp3-files/test.mp3"))
 
 
     # Hidden easter egg for the boys
     if message.content == "!bot":
         await message.channel.send('Botten er så tæt på at være færdig :pinching_hand:')
+
 
 @client.event
 async def on_ready():
@@ -128,9 +119,7 @@ async def on_ready():
         print(document)
 
 
-def test_method():
-    print("TEST")
-    time.sleep(1)
-    
-
+def sendWorkOver(channel):
+    channel.send('Test')
+        
 client.run(os.getenv("TOKEN"))
