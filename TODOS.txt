@@ -1,11 +1,20 @@
 # TODO
-Bot skal forlade rummet selv efter mp3 fil er slut eller ved command måske
-!play latex bastards
-!play bamse
-!play pomodoro lyd start/slut
-Hele projektet skal flyttes til virtuel maskine
-Database skal sættes op til at være online - lav prio
-Pomodoro skal færdiglaves - threading virker though
-Pomodoro default timers hvis andet ikke er specified
+    # BOT PART
+    Bot skal forlade rummet selv efter mp3 fil er slut eller ved command måske
+    Change on_message !karma so it only needs to include !karma, so you could see karma of other users.
+        E.g. !karma Hjorth - Would return the total karma of Hjorth no matter who the author is.
 
-:)
+    # POMODORO PART
+    Pomodoro skal færdiglaves - threading virker though
+    Pomodoro default timers hvis andet ikke er specified
+
+    # PLAY PART
+    !play latex bastards - FILE ADDED
+    !play bamse - DEN NYE POMODORO LYD
+    !play pomodoro lyd start/slut
+    Maybe seperate file for alle playing, if it starts to grow any bigger.
+        Makes the code more reable.
+    !play farvelsangen
+
+    # DB
+    Database skal sættes op til at være online - lav prio

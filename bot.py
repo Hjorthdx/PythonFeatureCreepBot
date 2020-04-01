@@ -1,7 +1,7 @@
+import Pomodoro
 import os, discord, pymongo, User, Db, threading, time
 from dotenv import load_dotenv
 
-import Pomodoro
 
 load_dotenv()
 
@@ -90,21 +90,26 @@ async def on_message(message):
                 x = Db.mycol.find_one({ "Name": user.name })
                 await message.channel.send('{} has {} total karma. {} opdutter and {} neddutter'.format(x["Name"], x["Opdutter"] - x["Neddutter"], x["Opdutter"], x["Neddutter"]))
 
-
     # No checks at the moment, so will likely break with wrong inputs from user.
     if "!pomodoro" in message.content:
+        # Som kurt altid har sagt, jeg ville ønske alt det her ikke var der
+        # Make method that deals with all of this.
+            # Needs to figure out if the user did give time contraints or its default timers
+            # Start the timers
         StringWorkLength = message.content[10:12]
         StringBreakLength = message.content[13:15]
         workLength = int(StringWorkLength)
         breakLength = int(StringBreakLength)
-        
-        Pomodoro.start(workLength, breakLength, message.channel)
+        Pomodoro.startTimer(workLength, breakLength, message.channel)
 
     if "!play" in message.content:
+        channel = message.author.voice.channel
         channel = client.get_channel(619094316106907662)
         vc = await channel.connect()
-        vc.play(discord.FFmpegPCMAudio(executable="E:/Program Files (x86)/ffmpeg/bin/ffmpeg.exe", source="C:/Users/Hjorth/Documents/GitHub/DiscordKarmaBot/mp3-files/test.mp3"))
-
+        vc.play(discord.FFmpegPCMAudio(executable="C:/Program Files (x86)/ffmpeg/bin/ffmpeg.exe", source="C:/Users/Sren/Documents/GitHub/DiscordKarmaBot/mp3-files/test.mp3"))
+        while vc.is_connected():
+            if not vc.is_playing():
+                await vc.disconnect()
 
     # Hidden easter egg for the boys
     if message.content == "!bot":
@@ -118,8 +123,7 @@ async def on_ready():
     for document in Db.mycol.find():
         print(document)
 
-
 def sendWorkOver(channel):
     channel.send('Test')
-        
+
 client.run(os.getenv("TOKEN"))
