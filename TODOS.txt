@@ -15,6 +15,9 @@
     Maybe seperate file for alle playing, if it starts to grow any bigger.
         Makes the code more reable.
     !play farvelsangen
+(X)    # Figure out some way to make it choose the channel with users in
+    !Motivationsbot - DU GØR DET OG DU GØR DET GODT
 
     # DB
     Database skal sættes op til at være online - lav prio
+    Add collection for work/time

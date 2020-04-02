@@ -1,13 +1,8 @@
-import Pomodoro
-import os, discord, pymongo, User, Db, threading, time
+import os, discord, pymongo, User, Db, threading, time, Pomodoro
 from dotenv import load_dotenv
 
 
 load_dotenv()
-
-# TODO
-# Add pomodoro timer
-# Add another collection in the database to track how long we are working for, just like lønnes ui in his 
 
 # Emotes
 kurtApproved = 619818932475527210
@@ -92,19 +87,21 @@ async def on_message(message):
 
     # No checks at the moment, so will likely break with wrong inputs from user.
     if "!pomodoro" in message.content:
-        # Som kurt altid har sagt, jeg ville ønske alt det her ikke var der
-        # Make method that deals with all of this.
-            # Needs to figure out if the user did give time contraints or its default timers
-            # Start the timers
-        StringWorkLength = message.content[10:12]
-        StringBreakLength = message.content[13:15]
-        workLength = int(StringWorkLength)
-        breakLength = int(StringBreakLength)
-        Pomodoro.startTimer(workLength, breakLength, message.channel)
+        Pomodoro.startTimer(message)
+
+    if "!latex" in message.content:
+        channel = message.author.voice.channel
+        vc = await channel.connect()
+        vc.play(discord.FFmpegPCMAudio(executable="C:/Program Files (x86)/ffmpeg/bin/ffmpeg.exe", source="C:/Users/Sren/Documents/GitHub/DiscordKarmaBot/mp3-files/LatexBusters.mp3"))
+        while vc.is_connected():
+            if not vc.is_playing():
+                await vc.disconnect()
 
     if "!play" in message.content:
         channel = message.author.voice.channel
-        channel = client.get_channel(619094316106907662)
+        #Fix later
+        if message.author == 693069681002676274:
+            channel = discord.utils.get(client.get_all_members(), id="103033943464353792").voice.channel
         vc = await channel.connect()
         vc.play(discord.FFmpegPCMAudio(executable="C:/Program Files (x86)/ffmpeg/bin/ffmpeg.exe", source="C:/Users/Sren/Documents/GitHub/DiscordKarmaBot/mp3-files/test.mp3"))
         while vc.is_connected():
@@ -122,8 +119,5 @@ async def on_ready():
 
     for document in Db.mycol.find():
         print(document)
-
-def sendWorkOver(channel):
-    channel.send('Test')
 
 client.run(os.getenv("TOKEN"))
