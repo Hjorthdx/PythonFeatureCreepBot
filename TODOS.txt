@@ -5,14 +5,16 @@
         E.g. !karma Hjorth - Would return the total karma of Hjorth no matter who the author is.
 
     # POMODORO PART
-    Pomodoro skal færdiglaves - threading virker though.
-    Pomodoro default timers hvis andet ikke er specified.
+(X)    Pomodoro basic timer funcionality.
+(X)    Pomodoro makes bot join and play sound when time is up.
+(X)    Pomodoro default timers hvis andet ikke er specified.
+    Pomodoro !time så vi kan se hvor lang tid der er tilbage af en timer
 
     # PLAY PART
 (X)    !play latex bastards - FILE ADDED.
-    !play bamse - DEN NYE POMODORO LYD.
+(X)    !play bamse - DEN NYE POMODORO LYD.
     !play pomodoro lyd start/slut.
-    Maybe seperate file for alle playing, if it starts to grow any bigger.
+(X)    Maybe seperate file for alle playing, if it starts to grow any bigger.
         Makes the code more reable.
         It is growing out of hand, please make a new file that contains the playing part,
         so the if statements in bot is not so big.

@@ -1,3 +1,4 @@
 # CONSTANTS
-DEFAULT_WORKTIME = 10 # Not correct value yet
-DEFAULT_BREAKTIME = 10 # Not correct value yet
+DEFAULT_WORKTIME = 50
+DEFAULT_BREAKTIME = 10
+DEFAULT_PLAYER_PATH = "C:/Program Files (x86)/ffmpeg/bin/ffmpeg.exe"

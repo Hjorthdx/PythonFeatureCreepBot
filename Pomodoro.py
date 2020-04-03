@@ -1,36 +1,36 @@
-import threading, Constants, discord, asyncio
-# Research background tasks as alternative to threading.
-    # Works better with asyncio that discord py uses.
-    # https://github.com/Rapptz/discord.py/blob/async/examples/background_task.py
-    # Make some sort of logic, where if !pomodoro, then a bool gets true and teh my_background_task gets called from the example.
+import discord, asyncio, Constants, Player, datetime
 
-def startTimer(message): # IS IN SECONDS RN
-    workLength, breakLength = getLengths(message.content) # AD
-    workTimer = threading.Timer(workLength, printer, [message])
-    breakTimer = threading.Timer(workLength + breakLength, printer2, [message])
-    workTimer.start()
-    breakTimer.start()
+
+async def startTimers(message):
+    workLength, breakLength = getLengths(message.content)
+    #workLength = workLength * 60
+    #breakLength = breakLength * 60
+    print(workLength)
+    print(breakLength)
+    await workTimer(message, workLength, breakLength)
+
+async def workTimer(message, workLength, breakLength):
+    await asyncio.sleep(workLength)
+    await message.channel.send("WORKS OVER, STARTING BREAK")
+    await Player.playTimerEnd(message.author.voice.channel)
+    await breakTimer(message, breakLength)
+
+async def breakTimer(message, breakLength):
+    await asyncio.sleep(breakLength)
+    await message.channel.send("BREAKS OVER")
+    await Player.playTimerEnd(message.author.voice.channel)
 
 def getLengths(content):
-    x = [int(s) for s in content.split() if s.isdigit()] # This gets all the digits from the string and saves in a list of integers.
+    x = [int(s) for s in content.split() if s.isdigit()] # Gets all the digits from the string and saves in a list of integers.
     if len(x) == 0:
-        return Constants.DEFAULT_WORKTIME, Constants.DEFAULT_BREAKTIME
+        return Constants.DEFAULT_WORKTIME * 60, Constants.DEFAULT_BREAKTIME * 60
     elif len(x) == 2:
         workLength = x[0]
         breakLength = x[1]
-        return workLength, breakLength
+        return workLength * 60, breakLength * 60
     else:
         print('Wrong formatted user input')
         # Should text this to the user
 
-def printer(message):
-    print("Work done")
-    # Kind of annoying to send message I need to await message.channel.send,
-    # but I can't await cause function is not async, and I can't make it,
-    # cause I can't await inside the threading.Timer.
-    # There has to be a solve for this. Just can't see it right now, it's late.
-    # Goodluck future Hjorth_
-
-def printer2(message):
-    print("Break done")
-
+def calculateRemainingTime():
+    return 1

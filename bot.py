@@ -1,7 +1,8 @@
-import os, discord, pymongo, User, Db, threading, time, Pomodoro
+import os, discord, pymongo, User, Db, threading, time, Pomodoro, Constants, Player
 from dotenv import load_dotenv
 
 
+import datetime
 load_dotenv()
 
 # Emotes
@@ -86,47 +87,27 @@ async def on_message(message):
                 await message.channel.send('{} has {} total karma. {} opdutter and {} neddutter'.format(x["Name"], x["Opdutter"] - x["Neddutter"], x["Opdutter"], x["Neddutter"]))
 
     if "!pomodoro" in message.content:
-        Pomodoro.startTimer(message)
+        await Pomodoro.startTimers(message)
 
-    if "!latex" in message.content:
-        channel = message.author.voice.channel
-        vc = await channel.connect()
-        vc.play(discord.FFmpegPCMAudio(executable="C:/Program Files (x86)/ffmpeg/bin/ffmpeg.exe", source="C:/Users/Sren/Documents/GitHub/DiscordKarmaBot/mp3-files/LatexBusters.mp3"))
-        while vc.is_connected():
-            if not vc.is_playing():
-                await vc.disconnect()
+    if "!time" in message.content:
+        await message.channel.send('{}'.format(Pomodoro.calculateRemainingTime())) # Print remaining time
 
-    if "!play" in message.content:
-        if message.author.bot:
-            channel = client.get_channel(619094316106907662)
-        else:
-            channel = message.author.voice.channel
-        
-        vc = await channel.connect()
-        vc.play(discord.FFmpegPCMAudio(executable="C:/Program Files (x86)/ffmpeg/bin/ffmpeg.exe", source="C:/Users/Sren/Documents/GitHub/DiscordKarmaBot/mp3-files/test.mp3"))
-        while vc.is_connected():
-            if not vc.is_playing():
-                await vc.disconnect()
-
-    if "!inspiration" in message.content:
-        channel = message.author.voice.channel
-        vc = await channel.connect()
-        vc.play(discord.FFmpegPCMAudio(executable="C:/Program Files (x86)/ffmpeg/bin/ffmpeg.exe", source="C:/Users/Sren/Documents/GitHub/DiscordKarmaBot/mp3-files/Ole_Wedel.mp3"))
-        while vc.is_connected():
-            if not vc.is_playing():
-                await vc.disconnect()
+    if "!p" in message.content:
+        await Player.play(message)
 
     # Hidden easter egg for the boys
     if message.content == "!bot":
         await message.channel.send('Botten er så tæt på at være færdig :pinching_hand:')
 
-# Lav fil med metode der gør alt det der spiller lyd. Abstraher alt det lort væk
-
 @client.event
 async def on_ready():
     print(f'{client.user} has connected to Discord!')
 
+    # Fix db
     for document in Db.mycol.find():
         print(document)
+
+    x = datetime.datetime.now()
+    print(x)
 
 client.run(os.getenv("TOKEN"))
