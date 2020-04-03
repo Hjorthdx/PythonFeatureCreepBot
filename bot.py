@@ -85,7 +85,6 @@ async def on_message(message):
                 x = Db.mycol.find_one({ "Name": user.name })
                 await message.channel.send('{} has {} total karma. {} opdutter and {} neddutter'.format(x["Name"], x["Opdutter"] - x["Neddutter"], x["Opdutter"], x["Neddutter"]))
 
-    # No checks at the moment, so will likely break with wrong inputs from user.
     if "!pomodoro" in message.content:
         Pomodoro.startTimer(message)
 
@@ -98,12 +97,21 @@ async def on_message(message):
                 await vc.disconnect()
 
     if "!play" in message.content:
-        channel = message.author.voice.channel
-        #Fix later
-        if message.author == 693069681002676274:
-            channel = discord.utils.get(client.get_all_members(), id="103033943464353792").voice.channel
+        if message.author.bot:
+            channel = client.get_channel(619094316106907662)
+        else:
+            channel = message.author.voice.channel
+        
         vc = await channel.connect()
         vc.play(discord.FFmpegPCMAudio(executable="C:/Program Files (x86)/ffmpeg/bin/ffmpeg.exe", source="C:/Users/Sren/Documents/GitHub/DiscordKarmaBot/mp3-files/test.mp3"))
+        while vc.is_connected():
+            if not vc.is_playing():
+                await vc.disconnect()
+
+    if "!inspiration" in message.content:
+        channel = message.author.voice.channel
+        vc = await channel.connect()
+        vc.play(discord.FFmpegPCMAudio(executable="C:/Program Files (x86)/ffmpeg/bin/ffmpeg.exe", source="C:/Users/Sren/Documents/GitHub/DiscordKarmaBot/mp3-files/Ole_Wedel.mp3"))
         while vc.is_connected():
             if not vc.is_playing():
                 await vc.disconnect()
@@ -112,6 +120,7 @@ async def on_message(message):
     if message.content == "!bot":
         await message.channel.send('Botten er så tæt på at være færdig :pinching_hand:')
 
+# Lav fil med metode der gør alt det der spiller lyd. Abstraher alt det lort væk
 
 @client.event
 async def on_ready():

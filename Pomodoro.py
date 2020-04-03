@@ -1,4 +1,8 @@
 import threading, Constants, discord, asyncio
+# Research background tasks as alternative to threading.
+    # Works better with asyncio that discord py uses.
+    # https://github.com/Rapptz/discord.py/blob/async/examples/background_task.py
+    # Make some sort of logic, where if !pomodoro, then a bool gets true and teh my_background_task gets called from the example.
 
 def startTimer(message): # IS IN SECONDS RN
     workLength, breakLength = getLengths(message.content) # AD
