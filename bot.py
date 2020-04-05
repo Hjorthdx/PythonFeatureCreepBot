@@ -78,11 +78,17 @@ async def on_raw_reaction_remove(payload):
 
 @client.event
 async def on_message(message):
-    if message.content == "!karma":
-        for user in users:
-            if message.author.id == user.intUserID:
-                x = Db.mycol.find_one({ "Name": user.name })
-                await message.channel.send('{} has {} total karma. {} opdutter and {} neddutter'.format(x["Name"], x["Opdutter"] - x["Neddutter"], x["Opdutter"], x["Neddutter"]))
+    if "!karma" in message.content:
+        if message.content == "!karma":
+            for user in users:
+                if message.author.id == user.intUserID:
+                    x = Db.mycol.find_one({ "Name": user.name })
+                    await message.channel.send('{} has {} total karma. {} opdutter and {} neddutter'.format(x["Name"], x["Opdutter"] - x["Neddutter"], x["Opdutter"], x["Neddutter"]))  
+        else:
+            for user in users:
+                if user.name in message.content:
+                    x = Db.mycol.find_one({ "Name": user.name })
+                    await message.channel.send('{} has {} total karma. {} opdutter and {} neddutter'.format(x["Name"], x["Opdutter"] - x["Neddutter"], x["Opdutter"], x["Neddutter"]))
 
     if "!pomodoro" in message.content:
         await Pomodoro.startTimers(message)
