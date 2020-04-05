@@ -98,7 +98,7 @@ async def on_message(message):
 
     if "!p" in message.content:
         await Player.play(message)
-
+        
     # Hidden easter egg for the boys
     if message.content == "!bot":
         await message.channel.send('Botten er så tæt på at være færdig :pinching_hand:')

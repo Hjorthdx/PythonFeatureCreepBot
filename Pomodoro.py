@@ -15,8 +15,8 @@ async def workTimer(message, workLength, breakLength):
     global workBool 
     workBool = True
     await asyncio.sleep(workLength)
-    await message.channel.send("WORKS OVER, STARTING BREAK")
-    await Player.playTimerEnd(message.author.voice.channel)
+    await message.channel.send("WORKS OVER. STARTING BREAK")
+    await Player.play(message)
     await breakTimer(message, breakLength)
 
 async def breakTimer(message, breakLength):
@@ -24,7 +24,7 @@ async def breakTimer(message, breakLength):
     workBool = False
     await asyncio.sleep(breakLength)
     await message.channel.send("BREAKS OVER")
-    await Player.playTimerEnd(message.author.voice.channel)
+    await Player.play(message)
 
 def getLengths(content):
     x = [int(s) for s in content.split() if s.isdigit()] # Gets all the digits from the string and saves in a list of integers.

@@ -1,7 +1,7 @@
 # TODO
     # BOT PART
 (X)    Bot skal forlade rummet selv efter mp3 fil er slut eller ved command måske.
-    Change on_message !karma so it only needs to include !karma, so you could see karma of other users.
+(X)    Change on_message !karma so it only needs to include !karma, so you could see karma of other users.
         E.g. !karma Hjorth - Would return the total karma of Hjorth no matter who the author is.
     Needs to add highscores for both opdutter og neddutter.
         Maybe give roles based on these, and let them update once someone else takes the lead.
