@@ -1,17 +1,7 @@
-import os
-import discord
-import pymongo
-import User
-import Db
-import Pomodoro
+import os, discord, pymongo, User, Db, threading, time, Pomodoro, Constants, Player
+from dotenv import load_dotenv
 
-# TODO
-# The enviorement file does not work either, so the bot token needs to be refreshed each time it is pushed to git
-# Add pomodoro timer
-# Add another collection in the database to track how long we are working for, just like lønnes ui in his 
-
-# Discord bot token
-TOKEN = 'NjkwNTM0MDI4MzE0NjczMTUy.XnzdwQ.xyP92St3lGIaA5IuIGNwHkCJ3lw'
+load_dotenv()
 
 # Emotes
 kurtApproved = 619818932475527210
@@ -93,20 +83,15 @@ async def on_message(message):
             if message.author.id == user.intUserID:
                 x = Db.mycol.find_one({ "Name": user.name })
                 await message.channel.send('{} has {} total karma. {} opdutter and {} neddutter'.format(x["Name"], x["Opdutter"] - x["Neddutter"], x["Opdutter"], x["Neddutter"]))
-    
 
-    # No checks at the moment, so will likely break with wrong inputs from user.
     if "!pomodoro" in message.content:
-        # Maybe if user is certain role on discord, so not everyone can fuck with this.
+        await Pomodoro.startTimers(message)
 
-        # This entire part is coded based on Kurts saying, I wish this was here.
-        x = message.content
-        string_pomodoro_time = x[10:]
-        string_break_time = x[-2:]
-        pomodoro_time = int(string_pomodoro_time)
-        break_time = int(string_break_time)
-        Pomodoro.startPomodoro(pomodoro_time, break_time)
-        
+    if "!time" in message.content:
+        await message.channel.send('Remaining time: {}'.format(Pomodoro.calculateRemainingTime()))
+
+    if "!p" in message.content:
+        await Player.play(message)
 
     # Hidden easter egg for the boys
     if message.content == "!bot":
@@ -116,7 +101,8 @@ async def on_message(message):
 async def on_ready():
     print(f'{client.user} has connected to Discord!')
 
+    # Fix db
     for document in Db.mycol.find():
         print(document)
 
-client.run(TOKEN)
+client.run(os.getenv("TOKEN"))
