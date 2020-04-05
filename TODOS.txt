@@ -3,13 +3,18 @@
 (X)    Bot skal forlade rummet selv efter mp3 fil er slut eller ved command måske.
     Change on_message !karma so it only needs to include !karma, so you could see karma of other users.
         E.g. !karma Hjorth - Would return the total karma of Hjorth no matter who the author is.
+    Needs to add highscores for both opdutter og neddutter.
+        Maybe give roles based on these, and let them update once someone else takes the lead.
 
     # POMODORO PART
 (X)    Pomodoro basic timer funcionality.
 (X)    Pomodoro makes bot join and play sound when time is up.
 (X)    Pomodoro default timers hvis andet ikke er specified.
-    Pomodoro !time så vi kan se hvor lang tid der er tilbage af en timer
-
+(X)    Pomodoro !time så vi kan se hvor lang tid der er tilbage af en timer
+    Let user change default timers for pomodoro, maybe something like !defaultbreak = something.
+    User needs to be able to STOP the timer
+    User needs to be able to PAUSE the timer
+    
     # PLAY PART
 (X)    !play latex bastards - FILE ADDED.
 (X)    !play bamse - DEN NYE POMODORO LYD.

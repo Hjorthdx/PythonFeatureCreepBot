@@ -1,8 +1,6 @@
 import os, discord, pymongo, User, Db, threading, time, Pomodoro, Constants, Player
 from dotenv import load_dotenv
 
-
-import datetime
 load_dotenv()
 
 # Emotes
@@ -90,7 +88,7 @@ async def on_message(message):
         await Pomodoro.startTimers(message)
 
     if "!time" in message.content:
-        await message.channel.send('{}'.format(Pomodoro.calculateRemainingTime())) # Print remaining time
+        await message.channel.send('Remaining time: {}'.format(Pomodoro.calculateRemainingTime()))
 
     if "!p" in message.content:
         await Player.play(message)
@@ -106,8 +104,5 @@ async def on_ready():
     # Fix db
     for document in Db.mycol.find():
         print(document)
-
-    x = datetime.datetime.now()
-    print(x)
 
 client.run(os.getenv("TOKEN"))
