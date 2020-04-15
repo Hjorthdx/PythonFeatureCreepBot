@@ -24,7 +24,7 @@ async def workTimer(message, workLength, breakLength):
                     "Starting time": startingTime}
     Db.pomodoroCol.insert_one(workPomodoro)
     await message.channel.send("WORKS OVER!! Hold pause forhelvede")
-    await Player.play(message)
+    await Player.play(True)
     print("Test 1")
     await breakTimer(message, breakLength)
 
@@ -38,7 +38,7 @@ async def breakTimer(message, breakLength):
     Db.pomodoroCol.insert_one(breakPomodoro)
     await message.channel.send("BREAKS OVER")
     print("Test 2")
-    await Player.play(message)
+    await Player.play(True)
 
 # Really only needs message.content, but I need to know the channel to send error msg.
 # Maybe this is fixable with just some time to think about it.

@@ -1,6 +1,6 @@
 import discord, Constants
 
-async def play(message):
+async def play(message=None, timerBool=None):
     if "latex" in message.content:
         channel = message.author.voice.channel
         await joinAndPlay(channel, Constants.LATEXBUSTERS)
@@ -19,7 +19,7 @@ async def play(message):
     elif "HA" in message.content:
         channel = message.author.voice.channel
         await joinAndPlay(channel, Constants.HA)
-    else:
+    elif timerBool == True:
         channel = message.author.voice.channel
         await joinAndPlay(channel, Constants.BAMSE)
 

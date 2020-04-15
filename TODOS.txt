@@ -22,7 +22,6 @@
     # PLAY PART
     !play pomodoro lyd start/slut.
     !play farvelsangen.
-    Fix default play case so it doesnt play same audio everytime there is a typo.
     Boomer alert
 
         # YOUTUBE Player
