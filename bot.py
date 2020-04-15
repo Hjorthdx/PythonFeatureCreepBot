@@ -84,18 +84,22 @@ async def on_message(message):
                 for user in users:
                     if message.author.id == user.intUserID:
                         x = Db.mycol.find_one({ "Name": user.name })
-                        await message.channel.send('{} has {} total karma. {} opdutter and {} neddutter'.format(x["Name"], x["Opdutter"] - x["Neddutter"], x["Opdutter"], x["Neddutter"]))  
+                        await message.channel.send('{} has {} total karma. {} opdutter and {} neddutter'.format(x["Name"], x["Opdutter"] - x["Neddutter"], x["Opdutter"], x["Neddutter"]), delete_after=Constants.DEFAULT_DELETE_WAIT_TIME)
+                        await message.delete()
             else:
                 for user in users:
                     if user.name in message.content:
                         x = Db.mycol.find_one({ "Name": user.name })
-                        await message.channel.send('{} has {} total karma. {} opdutter and {} neddutter'.format(x["Name"], x["Opdutter"] - x["Neddutter"], x["Opdutter"], x["Neddutter"]))
+                        await message.channel.send('{} has {} total karma. {} opdutter and {} neddutter'.format(x["Name"], x["Opdutter"] - x["Neddutter"], x["Opdutter"], x["Neddutter"]), delete_after=Constants.DEFAULT_DELETE_WAIT_TIME)
+                        await message.delete()
 
         if "!pomodoro" in message.content:
             await Pomodoro.startTimers(message)
+            await message.delete()
 
         if "!time" in message.content:
-            await message.channel.send('Remaining time: {}'.format(Pomodoro.calculateRemainingTime()))
+            await message.channel.send('Remaining time: {}'.format(Pomodoro.calculateRemainingTime()), delete_after=Constants.DEFAULT_DELETE_WAIT_TIME)
+            await message.delete()
 
         if "!changeDefault" in message.content:
             x = [int(s) for s in message.content.split() if s.isdigit()]
@@ -103,36 +107,34 @@ async def on_message(message):
                 Constants.DEFAULT_WORKTIME = x[0]
             elif "break" in message.content:
                 Constants.DEFAULT_BREAKTIME = x[0]
+            await message.delete()
 
         if "!p" in message.content:
             await Player.play(message)
+            message.delete()
         
         if message.content == "!help":
-            await message.channel.send("Current commands: \n * !karma - !karma Hjorth e.g. \n * !pomodoro - Default timers. !pomodoro 50 10 e.g. for 50/10 timer \n * !time - Remaining time on pomodoro \n * !changeDefault - !changeDefault work 50 e.g. \n * !p - Currently latex, bamse, inspiration. !p latex e.g. \n")
+            await message.channel.send("Current commands: \n * !karma - !karma Hjorth e.g. \n * !pomodoro - Default timers. !pomodoro 50 10 e.g. for 50/10 timer \n * !time - Remaining time on pomodoro \n * !changeDefault - !changeDefault work 50 e.g. \n * !p - Currently latex, bamse, inspiration. !p latex e.g. \n", delete_after=Constants.DEFAULT_DELETE_WAIT_TIME*3)
+            await message.delete()
         
-        # Hidden easter egg for the boys
         if message.content == "!bot":
-            await message.channel.send('Botten er så tæt på at være færdig :pinching_hand:')
+            await message.channel.send('Botten er så tæt på at være færdig :pinching_hand:', delete_after=Constants.DEFAULT_DELETE_WAIT_TIME)
+            await message.delete()
         
         if message.content == "!trello":
-            await message.channel.send(Constants.TRELLO_LINK)
+            await message.channel.send(Constants.TRELLO_LINK, delete_after=Constants.DEFAULT_DELETE_WAIT_TIME)
+            await message.delete()
         
         if message.content == "!rapport":
-            await message.channel.send(Constants.RAPPORT_LINK)
+            await message.channel.send(Constants.RAPPORT_LINK, delete_after=Constants.DEFAULT_DELETE_WAIT_TIME)
+            await message.delete()
 
 
 @client.event
 async def on_ready():
     print(f'{client.user} has connected to Discord!')
 
-    # Fix db
     for document in Db.mycol.find():
         print(document)
-    '''
-    channels = client.get_all_channels()
-    for c in channels:
-        if not c.connectable:
-            messages = await c.history(limit=200).flatten()
-            print(messages)
-'''
+
 client.run(os.getenv("TOKEN"))

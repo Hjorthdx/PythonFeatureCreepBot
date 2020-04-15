@@ -12,7 +12,7 @@ async def startTimers(message):
     workLength, breakLength = getLengths(message)
     global startingTime
     startingTime = datetime.datetime.now()
-    await message.channel.send("Starting timers: {} / {} minutes.".format(workLength / 60, breakLength / 60))
+    await message.channel.send("Starting timers: {} / {} minutes.".format(workLength / 60, breakLength / 60), delete_after=workLength+breakLength)
     await workTimer(message, workLength, breakLength)
 
 async def workTimer(message, workLength, breakLength):
@@ -23,7 +23,7 @@ async def workTimer(message, workLength, breakLength):
                     "Work bool": workBool,
                     "Starting time": startingTime}
     Db.pomodoroCol.insert_one(workPomodoro)
-    await message.channel.send("WORKS OVER!! Hold pause forhelvede")
+    await message.channel.send("WORKS OVER!! Hold pause forhelvede", delete_after=breakLength)
     await Player.play(True)
     print("Test 1")
     await breakTimer(message, breakLength)
@@ -36,7 +36,7 @@ async def breakTimer(message, breakLength):
                     "Work bool": workBool,
                     "Starting time": startingTime}
     Db.pomodoroCol.insert_one(breakPomodoro)
-    await message.channel.send("BREAKS OVER")
+    await message.channel.send("BREAKS OVER", delete_after=Constants.DEFAULT_DELETE_WAIT_TIME*3)
     print("Test 2")
     await Player.play(True)
 
