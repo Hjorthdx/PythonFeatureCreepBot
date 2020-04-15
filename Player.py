@@ -10,12 +10,18 @@ async def play(message):
     elif "inspiration" in message.content:
         channel = message.author.voice.channel
         await joinAndPlay(channel, Constants.OLE)
+    elif "danger" in message.content:
+        channel = message.author.voice.channel
+        await joinAndPlay(channel, Constants.DANGER)
+    elif "worst day" in message.content:
+        channel = message.author.voice.channel
+        await joinAndPlay(channel, Constants.WORSTDAY)
+    elif "HA" in message.content:
+        channel = message.author.voice.channel
+        await joinAndPlay(channel, Constants.HA)
     else:
         channel = message.author.voice.channel
         await joinAndPlay(channel, Constants.BAMSE)
-
-async def playTimerEnd(channel):
-    await joinAndPlay(channel, Constants.OLE)
 
 async def joinAndPlay(channel, mp3):
     vc = await channel.connect()

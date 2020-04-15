@@ -1,39 +1,55 @@
 # TODO
+    # General things
+        Tolower all user inputs, so they are not change sensitive.
+        Delete all messages that are used for bot input after they are not relevant.
+
     # BOT PART
-(X)    Bot skal forlade rummet selv efter mp3 fil er slut eller ved command måske.
-(X)    Change on_message !karma so it only needs to include !karma, so you could see karma of other users.
-        E.g. !karma Hjorth - Would return the total karma of Hjorth no matter who the author is.
     Needs to add highscores for both opdutter og neddutter.
         Maybe give roles based on these, and let them update once someone else takes the lead.
+    Update !help
 
     # POMODORO PART
-(X)    Pomodoro basic timer funcionality.
-(X)    Pomodoro makes bot join and play sound when time is up.
-(X)    Pomodoro default timers hvis andet ikke er specified.
-(X)    Pomodoro !time så vi kan se hvor lang tid der er tilbage af en timer
-    Let user change default timers for pomodoro, maybe something like !defaultbreak = something.
     User needs to be able to STOP the timer
     User needs to be able to PAUSE the timer
-    
+    Make bot ask if you've forgotten to start timer. If there are like 5+ people in voice channel, then it should ask if a timer is needed
+        Could be very helpful cause we always forgot those stupid timers
+        https://discordpy.readthedocs.io/en/latest/api.html#voicechannel -> Members returns a list of all the users in a specific voice channel,
+            maybe have some loop.wait_for(members.count >= 7) -> if timer not started, ask user if they want a timer started.
+    Comment inside pomodoro doucment needs to be done
+    @everyone when timers are up.
+
+
     # PLAY PART
-(X)    !play latex bastards - FILE ADDED.
-(X)    !play bamse - DEN NYE POMODORO LYD.
     !play pomodoro lyd start/slut.
-(X)    Maybe seperate file for alle playing, if it starts to grow any bigger.
-        Makes the code more reable.
-        It is growing out of hand, please make a new file that contains the playing part,
-        so the if statements in bot is not so big.
-            Maybe it can be abstracted more and the play document can handle which file to play.
-            if "something" in message.content
-                Player.Play(message) -> Some if chain in there that does the choosing of what to play. 
-                Only problem right now is that they are all different, !latex, !play, !inspiration etc.
-                MAYBE !p inspiration, then that would be a lot simpler and a lot less if in the bot file.
     !play farvelsangen.
-(X)    # Figure out some way to make it choose the channel with users in
-(X)    !Motivationsbot - DU GØR DET OG DU GØR DET GODT.
+    Fix default play case so it doesnt play same audio everytime there is a typo.
+    Boomer alert
+
+        # YOUTUBE Player
+            Get only url as input
+            Make some code along this.
+            @client.command(pass_context=True)
+            async def yt(ctx, url):
+
+                author = ctx.message.author
+                voice_channel = author.voice_channel
+                vc = await client.join_voice_channel(voice_channel)
+
+                player = await vc.create_ytdl_player(url)
+                player.start()
+            Stop the current playing stop
+                Andor skip to the next in the queue
+            Set up a queue
+            Volume adjustment?
+            Replay clip
 
     # DB
     Database skal sættes op til at være online - lav prio.
-    Reset all the data in the database, cause sten's id is different from everyone elses,
-        and it's pissing me off.
-    Add collection for work/time.
+
+    # Wikipedia speedrun
+        https://en.wikipedia.org/wiki/special:random - Gives a random wikipedia article
+        Let players join the game before it starts.
+        Start a timer on !start command
+        !done command, that returns the time it has run.
+            Possibly save this in database so we can have roles for this aswell.
+        Et array med mulige ting vi skal finde - !add til listen.
