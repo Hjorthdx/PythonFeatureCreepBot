@@ -1,7 +1,5 @@
 # DiscordKarmaBot
-Discord bot that can keep track of user reactions. User reactions will be stored on a database in form of karma to see who is the meme lord.
-
-Incoming features:
-Pomodoro timer
-Bot joins and plays a mp3 file when the time is up
+Discord bot that can keep track of user reactions. User reactions will be stored on a database in form of karma.
+Can keep track of one pomodoro timer now. Future update will make it able to keep multiple timers.
+Ability to play different stored mp3 files.
 
