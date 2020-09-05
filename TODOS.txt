@@ -1,12 +1,22 @@
 # TODO
+    # MASSIVE RESTRUCTURE
+        Make everything commands.
+            E.g. command !karma
+                This command just does what !karma does in on_message.
+
     # General things
         Tolower all user inputs, so they are not change sensitive.
-        Delete all messages that are used for bot input after they are not relevant.
+        Make installation guide to use the bot
+        Maybe refactor the entire program, so that there is use of client.commands?
+        Can the player file be turned into a class?
+
+    # USER CLASS
+        Add default values for pomodoro timers, so every user can change their default with the !change default command.
+        I think database, needs to keep track of the timer aswell, if that needs to be changed.
 
     # BOT PART
     Needs to add highscores for both opdutter og neddutter.
         Maybe give roles based on these, and let them update once someone else takes the lead.
-    Update !help
 
     # POMODORO PART
     User needs to be able to STOP the timer
@@ -15,14 +25,20 @@
         Could be very helpful cause we always forgot those stupid timers
         https://discordpy.readthedocs.io/en/latest/api.html#voicechannel -> Members returns a list of all the users in a specific voice channel,
             maybe have some loop.wait_for(members.count >= 7) -> if timer not started, ask user if they want a timer started.
+            https://discordpy.readthedocs.io/en/latest/api.html#discord.on_member_update USE THIS
+                TALKED TO SIMON ABOUT THIS. THIS SHOULD WORK
     Comment inside pomodoro doucment needs to be done
     @everyone when timers are up.
-
+    Needs to play in every room that there are peopple in
+    When there is a break play the lofi radio
+    Would be nice if everybody had their own default time for timers. Maybe just add as felt to the user class i dont know.
 
     # PLAY PART
     !play pomodoro lyd start/slut.
     !play farvelsangen.
+    !p let me in
     Boomer alert
+    Lofi radio
 
         # YOUTUBE Player
             Get only url as input
@@ -41,6 +57,8 @@
             Set up a queue
             Volume adjustment?
             Replay clip
+    Player class that has playing status. If playing - then add it to queue, so it doesnt cause error everytime multiple people play audio clip.
+    
 
     # DB
     Database skal sættes op til at være online - lav prio.
@@ -52,3 +70,10 @@
         !done command, that returns the time it has run.
             Possibly save this in database so we can have roles for this aswell.
         Et array med mulige ting vi skal finde - !add til listen.
+
+
+
+
+
+# Watchtogether feature i discord
+    Botten live streamer videon.

@@ -6,16 +6,37 @@ workBool = False
 # Ændre message.content her til bamse her, så default case ikke også er bamse hvis man skriver forkert
 # Måske skal start timers bare klare det hele i en funktion. Tror det er derfor break spiller to gange. Giv det evt et forsøg.
 
+# Hello sticks and stones may break your bones
+# self.work/break som den får fra init, som laver når en pomodoro bliver startet
+# Author skal gemmes som felt også
+# So it is object. Then !time needs to go
 async def startTimers(message):
     global workLength
     global breakLength
     workLength, breakLength = getLengths(message)
+
     global startingTime
     startingTime = datetime.datetime.now()
-    await message.channel.send("Starting timers: {} / {} minutes.".format(workLength / 60, breakLength / 60), delete_after=workLength+breakLength)
+
+    x = startingTime + datetime.timedelta(seconds=workLength)
+    if x.minute <= 9:
+        workEndTime = "{}:{}:{}".format(x.hour, int(str(0) + str(x.minute)), x.second)
+    else:
+        workEndTime = "{}:{}:{}".format(x.hour, x.minute, x.second)
+    
+    global breakEndTime
+    y = startingTime + datetime.timedelta(seconds=workLength + breakLength)
+    if y.minute <= 9:
+        breakEndTime = "{}:{}:{}".format(y.hour, int(str(0) + str(y.minute)), y.second)
+    else:
+        breakEndTime = "{}:{}:{}".format(y.hour, y.minute, y.second)
+
+    await message.channel.send("Starting timers: {} / {} minutes. \nWork ends at {} \nBreak ends at {}".format(workLength / 60, breakLength / 60, workEndTime, breakEndTime), delete_after=workLength+breakLength)
     await workTimer(message, workLength, breakLength)
+    await breakTimer(message, breakLength)
 
 async def workTimer(message, workLength, breakLength):
+    global breakEndTime
     global workBool 
     workBool = True
     await asyncio.sleep(workLength)
@@ -23,10 +44,8 @@ async def workTimer(message, workLength, breakLength):
                     "Work bool": workBool,
                     "Starting time": startingTime}
     Db.pomodoroCol.insert_one(workPomodoro)
-    await message.channel.send("WORKS OVER!! Hold pause forhelvede", delete_after=breakLength)
-    await Player.play(True)
-    print("Test 1")
-    await breakTimer(message, breakLength)
+    await message.channel.send("WORKS OVER!! Hold pause forhelvede @{} \nPausen slutter: {}".format(message.author, breakEndTime), delete_after=breakLength)
+    await Player.play(message, True)
 
 async def breakTimer(message, breakLength):
     global workBool
@@ -36,9 +55,8 @@ async def breakTimer(message, breakLength):
                     "Work bool": workBool,
                     "Starting time": startingTime}
     Db.pomodoroCol.insert_one(breakPomodoro)
-    await message.channel.send("BREAKS OVER", delete_after=Constants.DEFAULT_DELETE_WAIT_TIME*3)
-    print("Test 2")
-    await Player.play(True)
+    await message.channel.send("BREAKS OVER @{}".format(message.author), delete_after=Constants.DEFAULT_DELETE_WAIT_TIME*3)
+    await Player.play(message, True)
 
 # Really only needs message.content, but I need to know the channel to send error msg.
 # Maybe this is fixable with just some time to think about it.
