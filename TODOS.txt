@@ -31,7 +31,7 @@
     @everyone when timers are up.
     Needs to play in every room that there are peopple in
     When there is a break play the lofi radio
-    Would be nice if everybody had their own default time for timers. Maybe just add as felt to the user class i dont know.
+(Partially complete)    Would be nice if everybody had their own default time for timers. Maybe just add as felt to the user class i dont know.
 
     # PLAY PART
     !play pomodoro lyd start/slut.
@@ -70,10 +70,10 @@
         !done command, that returns the time it has run.
             Possibly save this in database so we can have roles for this aswell.
         Et array med mulige ting vi skal finde - !add til listen.
+        '
 
 
-
-
-
-# Watchtogether feature i discord
-    Botten live streamer videon.
+Need to get rid of watch2gether api key. Get it into .env file.
+Add timer per user instead of name.
+Timer doesnt play.
+Pomodoro's are not saved in the datebase currently.

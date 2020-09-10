@@ -1,4 +1,4 @@
-import os, discord, pymongo, User, Db, time, Pomodoro, Constants, Player, requests
+import os, discord, pymongo, User, Db, time, Constants
 from dotenv import load_dotenv
 from youtube_dl import YoutubeDL
 from discord.ext import commands
@@ -43,17 +43,6 @@ async def karma(ctx):
                 await ctx.message.channel.send('{} has {} total karma. {} opdutter and {} neddutter'.format(x["Name"], x["Opdutter"] - x["Neddutter"], x["Opdutter"], x["Neddutter"]), delete_after=Constants.DEFAULT_DELETE_WAIT_TIME)
     await ctx.message.delete()  
 
-@bot.command(help="Default is 50/10.")
-async def pomodoro(ctx):
-    print("I got called")
-    await Pomodoro.startTimers(ctx.message)
-    await ctx.message.delete()
-
-@bot.command(name='time', help="Remaining time on pomodoro")
-async def _time(ctx):
-    await ctx.message.channel.send('Remaining time: {}'.format(Pomodoro.calculateRemainingTime()), delete_after=Constants.DEFAULT_DELETE_WAIT_TIME)
-    await ctx.message.delete()
-
 @bot.command(help="!changeDefault work 50 e.g.")
 async def changeDefault(ctx):
     x = [int(s) for s in ctx.message.content.split() if s.isdigit()]
@@ -63,28 +52,15 @@ async def changeDefault(ctx):
         Constants.DEFAULT_BREAKTIME = x[0]
     await ctx.message.delete()
 
-@bot.command(help="i.e. !play slet dem")
-async def play(ctx):
-    await Player.play(ctx.message)
-    await ctx.message.delete()
-
 @bot.command(help="Trello link")
 async def trello(ctx):
     await ctx.message.channel.send(Constants.TRELLO_LINK, delete_after=Constants.DEFAULT_DELETE_WAIT_TIME)
     await ctx.message.delete()
 
-@bot.command(help="Rapport link", )
+@bot.command(help="Rapport link")
 async def rapport(ctx):
     await ctx.message.channel.send(Constants.RAPPORT_LINK, delete_after=Constants.DEFAULT_DELETE_WAIT_TIME)
     await ctx.message.delete()
-
-@bot.command(help="Followed by youtube link")
-async def watch(ctx):
-    url = ctx.message.content
-    url.replace("!watch", "")
-    await ctx.message.delete()
-    x = generateWatch2getherURL(url)
-    await ctx.message.channel.send(x, delete_after=Constants.DEFAULT_DELETE_WAIT_TIME * 3)
 
 @bot.event
 async def on_raw_reaction_add(payload):
@@ -139,13 +115,21 @@ async def on_ready():
     print(f'{bot.user} has connected to Discord!')
 
     for document in Db.mycol.find():
-        print(document)
+        print(document)    
 
-def generateWatch2getherURL(request):
-    obj = {'share': request, 'api_key': Constants.API_KEY}
-    x = requests.post(Constants.WATCH2GETHER_BASELINK, data=obj)
-    y = x.json()
-    streamkey = y['streamkey']
-    return Constants.WATCH2GETHER_ROOMLINK + streamkey
+@bot.command(hidden=True)
+async def load(ctx, extension):
+    bot.load_extension(f'cogs.{extension}')
+    await ctx.message.delete()
+
+@bot.command(hidden=True)
+async def unload(ctx, extension):
+    bot.unload_extension(f'cogs.{extension}')
+    await ctx.message.delete()
+
+for filename in os.listdir('./DiscordKarmaBot/cogs'):
+    if filename.endswith('.py'):
+        bot.load_extension(f'cogs.{filename[:-3]}')
+    
 
 bot.run(os.getenv("TOKEN"))

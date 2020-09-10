@@ -29,11 +29,11 @@ DEFAULT_YOUTUBE_LINK = "C:/Users/Sren/Documents/GitHub/youtube.mp3"
 
 # LINKS
 TRELLO_LINK = "https://trello.com/b/HfvQdIw0/p4-main-board"
-RAPPORT_LINK = "https://www.overleaf.com/project/5e3990dc5e8fc00001a008ac"
+RAPPORT_LINK = "https://www.overleaf.com/project/5f56101b9841ac000168e006"
 WIKIPEDIA_RANDOM_LINK = "https://en.wikipedia.org/wiki/Special:Random"
 
 
 # WATCH2GETHER
 WATCH2GETHER_BASELINK = "https://w2g.tv/rooms/create.json"
-WATCH2GETHER_ROOMLINK = " https://w2g.tv/rooms/"
+WATCH2GETHER_ROOMLINK = "https://w2g.tv/rooms/"
 API_KEY = 'ujie332t97934204d'
