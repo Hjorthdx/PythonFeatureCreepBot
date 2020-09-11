@@ -12,7 +12,7 @@ class Player(commands.Cog):
     async def on_ready(self):
         print("Player cog is loaded")
 
-    @commands.command(brief="i.e. !play slet dem. !available for list of all mp3's.")
+    @commands.command(brief="!play slet dem. !available for list of all mp3's.")
     async def play(self, ctx):
         if "latex" in ctx.message.content:
             channel = ctx.message.author.voice.channel
@@ -78,9 +78,9 @@ class Player(commands.Cog):
             if filename.endswith('.mp3'):
                 availableMp3Files += f"{filename[:-4]}\n"
         availableMp3Files+="```"
-        await ctx.send(availableMp3Files)
+        await ctx.send(availableMp3Files, delete_after=15)
 
-    @commands.command(help="Command for the Pomodoro cog to utilize", self_bot=True)
+    @commands.command(help="Command for the Pomodoro cog to utilize", self_bot=True, hidden=True)
     async def PlayPomodoro(self, ctx):
         channel = ctx.message.author.voice.channel
         await self.joinAndPlay(channel, self.basePath + "Lyt nu.mp3")

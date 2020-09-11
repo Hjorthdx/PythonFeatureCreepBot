@@ -72,7 +72,11 @@
         Et array med mulige ting vi skal finde - !add til listen.
         '
 
-
-Need to get rid of watch2gether api key. Get it into .env file.
 Add timer per user instead of name.
 Pomodoro's are not saved in the datebase currently.
+
+
+# Notes to self
+    # Help command
+        Thing that deletes !help is in: class _HelpCommandImpl(Command): (line 182) in the prepare method.
+        The thing that deletes the help message itself is in: class DefaultHelpCommand(HelpCommand): (line 996) in async def send_pages(self):

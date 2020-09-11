@@ -1,6 +1,8 @@
 import discord
 from discord.ext import commands
-
+import sys
+sys.path.insert(0,"C:/Users/Sren/Documents/GitHub/DiscordKarmaBot")
+import Db
 
 class Pomodoro(commands.Cog):
     # Some documentation
@@ -66,7 +68,7 @@ class Pomodoro(commands.Cog):
             if x == timer.name:
                 neededTimer = timer
         remainingTime = neededTimer.calculateRemainingTime()
-        await ctx.send("remaining time on timer {}: {}".format(neededTimer.name,remainingTime), delete_after=5)
+        await ctx.send("remaining time on timer {}: {}".format(neededTimer.name,remainingTime), delete_after=15)
         await ctx.message.delete()
 
     @commands.command(help="!changeDefault work 50 e.g.")
@@ -95,23 +97,32 @@ class Timer():
 
     async def startTimer(self, ctx):
         await self.workTimer(self.workLength)
-        await ctx.send("Works over! Break starts now", delete_after=30)
+        await ctx.send("Works over! Break starts now", delete_after=self.breakLength)
         await ctx.invoke(self.pending_command)
         
         await self.breakTimer(self.breakLength)
-        await ctx.send("Breaks over!", delete_after=30)
+        await ctx.send("Breaks over!", delete_after=15)
         await ctx.invoke(self.pending_command)
 
     async def workTimer(self, workLength):
         self.workBool = True
         await asyncio.sleep(workLength)
+        # Adds the work duration to the database.
+        workPomodoro = {"Work duration:": workLength / 60,
+                        "Work bool": self.workBool,
+                        "Starting time": self.startingTime}
+        Db.pomodoroCol.insert_one(workPomodoro)
 
     async def breakTimer(self, breakLength):
         self.workBool = False
         await asyncio.sleep(breakLength)
+        # Adds the break duration to the database.
+        breakPomodoro = {"Break duration:": breakLength / 60,
+                        "Work bool": self.workBool,
+                        "Starting time": self.startingTime}
+        Db.pomodoroCol.insert_one(breakPomodoro)
 
     def calculateRemainingTime(self):
-        print("Calculate called")
         hours = 0
         minutes = 0
         duration = datetime.datetime.now() - self.startingTime

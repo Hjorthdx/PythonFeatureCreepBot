@@ -1,6 +1,5 @@
 import discord
 from discord.ext import commands
-# from DiscordKarmaBot import Db, User
 import sys
 sys.path.insert(0,"C:/Users/Sren/Documents/GitHub/DiscordKarmaBot")
 import Db, User
@@ -40,12 +39,12 @@ class Karma(commands.Cog):
             for user in self.users:
                 if ctx.message.author.id == user.intUserID:
                     x = Db.mycol.find_one({ "Name": user.name })
-                    await ctx.message.channel.send('{} has {} total karma. {} opdutter and {} neddutter'.format(x["Name"], x["Opdutter"] - x["Neddutter"], x["Opdutter"], x["Neddutter"]), delete_after=20)
+                    await ctx.message.channel.send('{} has {} total karma. {} opdutter and {} neddutter'.format(x["Name"], x["Opdutter"] - x["Neddutter"], x["Opdutter"], x["Neddutter"]), delete_after=15)
         else:
             for user in self.users:
                 if user.name in ctx.message.content:
                     x = Db.mycol.find_one({ "Name": user.name })
-                    await ctx.message.channel.send('{} has {} total karma. {} opdutter and {} neddutter'.format(x["Name"], x["Opdutter"] - x["Neddutter"], x["Opdutter"], x["Neddutter"]), delete_after=20)
+                    await ctx.message.channel.send('{} has {} total karma. {} opdutter and {} neddutter'.format(x["Name"], x["Opdutter"] - x["Neddutter"], x["Opdutter"], x["Neddutter"]), delete_after=15)
         await ctx.message.delete()
 
     @commands.Cog.listener()
