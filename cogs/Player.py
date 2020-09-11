@@ -80,5 +80,10 @@ class Player(commands.Cog):
         availableMp3Files+="```"
         await ctx.send(availableMp3Files)
 
+    @commands.command(help="Command for the Pomodoro cog to utilize", self_bot=True)
+    async def PlayPomodoro(self, ctx):
+        channel = ctx.message.author.voice.channel
+        await self.joinAndPlay(channel, self.basePath + "Lyt nu.mp3")
+
 def setup(bot):
     bot.add_cog(Player(bot))

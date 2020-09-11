@@ -75,5 +75,4 @@
 
 Need to get rid of watch2gether api key. Get it into .env file.
 Add timer per user instead of name.
-Timer doesnt play.
 Pomodoro's are not saved in the datebase currently.

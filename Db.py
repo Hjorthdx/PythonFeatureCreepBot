@@ -5,6 +5,9 @@ mydb = myClient["mydatabase"]
 mycol = mydb["UserKarma"]
 pomodoroCol = mydb["Pomodoro"]
 
+for document in mycol.find():
+    print(document)  
+
 if not mycol.find():
     karmaList = [
     {"Name": "Adil", "Opdutter": 0, "Neddutter": 0},

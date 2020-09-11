@@ -1,14 +1,14 @@
 import discord
 from discord.ext import commands
 
-# When timer is expired, it still does not play a mp3 file.
-# Tried hack right now, with the bot activating its own command through discord,
-# But please think of better solution :D
+
 class Pomodoro(commands.Cog):
     # Some documentation
 
     def __init__(self, bot):
         self.bot = bot
+        self.defaultWorkTimer = 50
+        self.defaultBreakTimer = 10
         self.currentTimers = []
 
     @commands.Cog.listener()
@@ -17,15 +17,18 @@ class Pomodoro(commands.Cog):
 
     @commands.command(brief="Default value 50/10", help="!pomodoro x y, where x is work length and y is break length. Currently needs a name aswell, cause not fully operational yet. Working on it :D")
     async def pomodoro(self, ctx):
+        # The sound that needs to be played
+        pending_command = self.bot.get_command("PlayPomodoro")
+
         # Get lengths of pomdoro timer
         workLength, breakLength = self.getLengthsFromMessage(ctx.message)
 
         x = ctx.message.content.replace("!test", "")
         # Create new Timer object
-        newTimer = Timer(x, workLength, breakLength)
+        newTimer = Timer(x, workLength, breakLength, pending_command)
 
-        # Tell users timer information
-        # Should prob be in the timer object, if it can work with async.
+        # Formats the time data
+        # Perhabs make this a function, so I don't have to look at it as Kurt would say.
         x = newTimer.startingTime + datetime.timedelta(seconds=workLength)
         if x.minute <= 9:
             workEndTime = "{}:{}:{}".format(x.hour, int(str(0) + str(x.minute)), x.second)
@@ -38,6 +41,7 @@ class Pomodoro(commands.Cog):
         else:
             breakEndTime = "{}:{}:{}".format(y.hour, y.minute, y.second)
 
+        # Informs the user that a pomodoro has begun
         await ctx.send("Timer: {} \nStarting timers: {} / {} minutes. \nWork ends at {} \nBreak ends at {}".format(newTimer.name, workLength / 60, breakLength / 60, workEndTime, breakEndTime), delete_after=newTimer.workLength + newTimer.breakLength)
         self.currentTimers.append(newTimer)
         await newTimer.startTimer(ctx)
@@ -46,7 +50,7 @@ class Pomodoro(commands.Cog):
     def getLengthsFromMessage(self, message):
         x = [int(s) for s in message.content.split() if s.isdigit()] # Gets all the digits from the string and saves in a list of integers.
         if len(x) == 0:
-            return 60 , 60
+            return self.defaultWorkTimer * 60 , self.defaultBreakTimer * 60
         elif len(x) == 2:
             workLength = x[0]
             breakLength = x[1]
@@ -64,32 +68,39 @@ class Pomodoro(commands.Cog):
         remainingTime = neededTimer.calculateRemainingTime()
         await ctx.send("remaining time on timer {}: {}".format(neededTimer.name,remainingTime), delete_after=5)
         await ctx.message.delete()
-        
+
+    @commands.command(help="!changeDefault work 50 e.g.")
+    async def changeDefault(self, ctx):
+        x = [int(s) for s in ctx.message.content.split() if s.isdigit()]
+        if "work" in ctx.message.content:
+            self.defaultWorkTimer = x[0]
+        elif "break" in ctx.message.content:
+            self.defaultBreakTimer = x[1]
+        await ctx.message.delete()
 
 
 def setup(bot):
     bot.add_cog(Pomodoro(bot))
 
-
-
 import datetime, asyncio
 
 class Timer():
-    def __init__(self, name, workLength, breakLength):
+    def __init__(self, name, workLength, breakLength, pending_command):
         self.name = name
         self.workLength = workLength
         self.breakLength = breakLength
         self.startingTime = datetime.datetime.now()
         self.workBool = True
+        self.pending_command = pending_command
 
     async def startTimer(self, ctx):
         await self.workTimer(self.workLength)
-        await ctx.send("!play lyt nu", delete_after=5)
-        await ctx.send("Test work timer ended", delete_after=5)
+        await ctx.send("Works over! Break starts now", delete_after=30)
+        await ctx.invoke(self.pending_command)
         
         await self.breakTimer(self.breakLength)
-        await ctx.send("!play lyt nu", delete_after=5)
-        await ctx.send("Test break time ended", delete_after=5)
+        await ctx.send("Breaks over!", delete_after=30)
+        await ctx.invoke(self.pending_command)
 
     async def workTimer(self, workLength):
         self.workBool = True
