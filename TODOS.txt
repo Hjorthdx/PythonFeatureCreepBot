@@ -1,39 +1,56 @@
 # TODO
+    # General things
+        Tolower all user inputs, so they are not change sensitive.
+        Make installation guide to use the bot
+
+    # USER CLASS
+        Add default values for pomodoro timers, so every user can change their default with the !change default command.
+        I think database, needs to keep track of the timer aswell, if that needs to be changed.
+
     # BOT PART
-(X)    Bot skal forlade rummet selv efter mp3 fil er slut eller ved command måske.
-    Change on_message !karma so it only needs to include !karma, so you could see karma of other users.
-        E.g. !karma Hjorth - Would return the total karma of Hjorth no matter who the author is.
     Needs to add highscores for both opdutter og neddutter.
         Maybe give roles based on these, and let them update once someone else takes the lead.
 
     # POMODORO PART
-(X)    Pomodoro basic timer funcionality.
-(X)    Pomodoro makes bot join and play sound when time is up.
-(X)    Pomodoro default timers hvis andet ikke er specified.
-(X)    Pomodoro !time så vi kan se hvor lang tid der er tilbage af en timer
-    Let user change default timers for pomodoro, maybe something like !defaultbreak = something.
     User needs to be able to STOP the timer
     User needs to be able to PAUSE the timer
-    
+    Make bot ask if you've forgotten to start timer. If there are like 5+ people in voice channel, then it should ask if a timer is needed
+        Could be very helpful cause we always forgot those stupid timers
+        https://discordpy.readthedocs.io/en/latest/api.html#voicechannel -> Members returns a list of all the users in a specific voice channel,
+            maybe have some loop.wait_for(members.count >= 7) -> if timer not started, ask user if they want a timer started.
+            https://discordpy.readthedocs.io/en/latest/api.html#discord.on_member_update USE THIS
+                TALKED TO SIMON ABOUT THIS. THIS SHOULD WORK
+    Comment inside pomodoro doucment needs to be done
+    @everyone when timers are up.
+    Needs to play in every room that there are peopple in
+    When there is a break play the lofi radio
+
     # PLAY PART
-(X)    !play latex bastards - FILE ADDED.
-(X)    !play bamse - DEN NYE POMODORO LYD.
     !play pomodoro lyd start/slut.
-(X)    Maybe seperate file for alle playing, if it starts to grow any bigger.
-        Makes the code more reable.
-        It is growing out of hand, please make a new file that contains the playing part,
-        so the if statements in bot is not so big.
-            Maybe it can be abstracted more and the play document can handle which file to play.
-            if "something" in message.content
-                Player.Play(message) -> Some if chain in there that does the choosing of what to play. 
-                Only problem right now is that they are all different, !latex, !play, !inspiration etc.
-                MAYBE !p inspiration, then that would be a lot simpler and a lot less if in the bot file.
     !play farvelsangen.
-(X)    # Figure out some way to make it choose the channel with users in
-(X)    !Motivationsbot - DU GØR DET OG DU GØR DET GODT.
+    !p let me in
+    Boomer alert
+    Lofi radio
+
+    Player class that has playing status. If playing - then add it to queue, so it doesnt cause error everytime multiple people play audio clip.
+    
 
     # DB
     Database skal sættes op til at være online - lav prio.
-    Reset all the data in the database, cause sten's id is different from everyone elses,
-        and it's pissing me off.
-    Add collection for work/time.
+
+    # Wikipedia speedrun
+        https://en.wikipedia.org/wiki/special:random - Gives a random wikipedia article
+        Let players join the game before it starts.
+        Start a timer on !start command
+        !done command, that returns the time it has run.
+            Possibly save this in database so we can have roles for this aswell.
+        Et array med mulige ting vi skal finde - !add til listen.
+        '
+
+Add timer per user instead of name.
+
+
+# Notes to self
+    # Help command
+        Thing that deletes !help is in: class _HelpCommandImpl(Command): (line 182) in the prepare method.
+        The thing that deletes the help message itself is in: class DefaultHelpCommand(HelpCommand): (line 996) in async def send_pages(self):

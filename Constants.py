@@ -1,6 +1,1 @@
-# CONSTANTS
-DEFAULT_WORKTIME = 50
-DEFAULT_BREAKTIME = 10
-DEFAULT_PLAYER_PATH = "C:/Program Files (x86)/ffmpeg/bin/ffmpeg.exe"
-SECONDS_IN_HOUR = 3600
-SECONDS_IN_MINUTE = 60
+WIKIPEDIA_RANDOM_LINK = "https://en.wikipedia.org/wiki/Special:Random"
