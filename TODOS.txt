@@ -1,14 +1,7 @@
 # TODO
-    # MASSIVE RESTRUCTURE
-        Make everything commands.
-            E.g. command !karma
-                This command just does what !karma does in on_message.
-
     # General things
         Tolower all user inputs, so they are not change sensitive.
         Make installation guide to use the bot
-        Maybe refactor the entire program, so that there is use of client.commands?
-        Can the player file be turned into a class?
 
     # USER CLASS
         Add default values for pomodoro timers, so every user can change their default with the !change default command.
@@ -31,7 +24,6 @@
     @everyone when timers are up.
     Needs to play in every room that there are peopple in
     When there is a break play the lofi radio
-(Partially complete)    Would be nice if everybody had their own default time for timers. Maybe just add as felt to the user class i dont know.
 
     # PLAY PART
     !play pomodoro lyd start/slut.
@@ -40,23 +32,6 @@
     Boomer alert
     Lofi radio
 
-        # YOUTUBE Player
-            Get only url as input
-            Make some code along this.
-            @client.command(pass_context=True)
-            async def yt(ctx, url):
-
-                author = ctx.message.author
-                voice_channel = author.voice_channel
-                vc = await client.join_voice_channel(voice_channel)
-
-                player = await vc.create_ytdl_player(url)
-                player.start()
-            Stop the current playing stop
-                Andor skip to the next in the queue
-            Set up a queue
-            Volume adjustment?
-            Replay clip
     Player class that has playing status. If playing - then add it to queue, so it doesnt cause error everytime multiple people play audio clip.
     
 
@@ -73,7 +48,6 @@
         '
 
 Add timer per user instead of name.
-Pomodoro's are not saved in the datebase currently.
 
 
 # Notes to self

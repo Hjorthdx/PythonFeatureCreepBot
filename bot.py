@@ -17,9 +17,9 @@ async def unload(ctx, extension):
 
 @bot.command(hidden=True)
 async def reload(ctx, extension):
-    for filename in os.listdir('./DiscordKarmaBot/cogs'):
-        if filename.endswith('.py'):
-            bot.load_extension(f'cogs.{filename[:-3]}')
+    bot.unload_extension(f'cogs.{extension}')
+    bot.load_extension(f'cogs.{extension}')
+    await ctx.message.delete()
 
 @bot.event
 async def on_ready():

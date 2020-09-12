@@ -25,7 +25,7 @@ class Pomodoro(commands.Cog):
         # Get lengths of pomdoro timer
         workLength, breakLength = self.getLengthsFromMessage(ctx.message)
 
-        x = ctx.message.content.replace("!test", "")
+        x = ctx.message.content.replace("!pomodoro", "")
         # Create new Timer object
         newTimer = Timer(x, workLength, breakLength, pending_command)
 
@@ -44,7 +44,7 @@ class Pomodoro(commands.Cog):
             breakEndTime = "{}:{}:{}".format(y.hour, y.minute, y.second)
 
         # Informs the user that a pomodoro has begun
-        await ctx.send("Timer: {} \nStarting timers: {} / {} minutes. \nWork ends at {} \nBreak ends at {}".format(newTimer.name, workLength / 60, breakLength / 60, workEndTime, breakEndTime), delete_after=newTimer.workLength + newTimer.breakLength)
+        await ctx.send("Timer name: {} \nStarting timers: {} / {} minutes. \nWork ends at {} \nBreak ends at {}".format(newTimer.name, workLength / 60, breakLength / 60, workEndTime, breakEndTime), delete_after=newTimer.workLength + newTimer.breakLength)
         self.currentTimers.append(newTimer)
         await newTimer.startTimer(ctx)
         await ctx.message.delete()
