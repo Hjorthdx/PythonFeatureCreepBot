@@ -1,1 +1,0 @@
-WIKIPEDIA_RANDOM_LINK = "https://en.wikipedia.org/wiki/Special:Random"

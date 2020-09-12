@@ -46,8 +46,9 @@ class Player(commands.Cog):
         await ctx.send("Changed volume to {}%".format(volume), delete_after=15)
         await ctx.message.delete()
 
+    # Was the join command before. Just renamed for now until further notice with the wikipedia speedrun
     @commands.command(help="Makes the bot join a desired voice channel")
-    async def join(self, ctx, *, channel: discord.VoiceChannel):
+    async def connect(self, ctx, *, channel: discord.VoiceChannel):
         if ctx.voice_client is not None:
             return await ctx.voice_client.move_to(channel)
         
