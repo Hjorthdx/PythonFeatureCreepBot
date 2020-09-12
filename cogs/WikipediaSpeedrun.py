@@ -15,7 +15,7 @@ class WikipediaSpeedrun(commands.Cog):
     async def on_ready(self):
         print("WikipediaSpeedrun cog is loaded")
 
-    @commands.command()
+    @commands.command(help="Join the race")
     async def join(self, ctx):
         if ctx.message.author.display_name in self.participants:
             ctx.send("{}, you are already in the race! Stand by!".format(ctx.message.author.display_name), delete_after=15)
@@ -24,7 +24,7 @@ class WikipediaSpeedrun(commands.Cog):
         await ctx.send("{} joined the race! \n Current players are: \n{}".format(ctx.message.author.display_name, self.participants), delete_after=15)
         await ctx.message.delete()
 
-    @commands.command()
+    @commands.command(help="Leave the race")
     async def leave(self, ctx):
         if ctx.message.author.display_name not in self.participants:
             ctx.send("{}, you already not in the race!".format(ctx.message.author.display_name), delete_after=15)
@@ -33,7 +33,7 @@ class WikipediaSpeedrun(commands.Cog):
         await ctx.send("{} left the race. \n Current players are: \n{}".format(ctx.message.author.display_name, self.participants), delete_after=15)
         await ctx.message.delete()
 
-    @commands.command()
+    @commands.command(brief="!goal article link", help="This is currently not saved, but it prob should be stored in the database, so we can keep score.")
     async def goal(self, ctx):
         if ctx.message.author.display_name in self.participants and self.endArticle == None:
             self.endArticle = ctx.message.content.replace("!goal", "")
@@ -44,7 +44,7 @@ class WikipediaSpeedrun(commands.Cog):
             await ctx.send("{}, you are not in the race. Join the race to set the goal".format(ctx.message.author.display_name), delete_after=15)
         await ctx.message.delete()
 
-    @commands.command()
+    @commands.command(brief="Starts the run", help="Atleast two competitors are needed to start a race.")
     async def start(self, ctx):
         if len(self.participants) == 0: #Should be more than 2? Who wants to race only themself, other than me while testing ofc.
             await ctx.send("Not enough competitors <:Spand:619148485379358739>", delete_after=15)
@@ -54,7 +54,7 @@ class WikipediaSpeedrun(commands.Cog):
             self.startingTime = datetime.datetime.now()
         await ctx.message.delete()
 
-    @commands.command()
+    @commands.command(help="Ends the run and announces winner + elapsed time")
     async def done(self, ctx):
         if ctx.message.author.display_name in self.participants:
             self.finishTime = datetime.datetime.now()
