@@ -20,7 +20,7 @@ class WikipediaSpeedrun(commands.Cog):
 
     @commands.command(help="Join the race")
     async def join(self, ctx):
-        x = self.currentRun.addCompetitor(ctx)
+        x = self.currentRun.addCompetitor(ctx.message.author.display_name)
         if x == 0: # If player is already in the race
             await ctx.send("{}, you are already in the race! Stand by!".format(ctx.message.author.display_name), delete_after=15)
         else:
@@ -34,7 +34,7 @@ class WikipediaSpeedrun(commands.Cog):
         
     @commands.command(help="Leave the race")
     async def leave(self, ctx):
-        x = self.currentRun.removeCompetitor(ctx)
+        x = self.currentRun.removeCompetitor(ctx.message.author.display_name)
         if x == 0: # If player is not the in the race
             ctx.send("{}, you are not in the race!".format(ctx.message.author.display_name), delete_after=15)
         else:
@@ -49,7 +49,7 @@ class WikipediaSpeedrun(commands.Cog):
 
     @commands.command(brief="!goal article link")
     async def goal(self, ctx):
-        x = self.currentRun.setGoalArticle(ctx)
+        x = self.currentRun.setGoalArticle(ctx.message.author.display_name, ctx.message.content.replace("!goal", ""))
         if x == 0: # If the player is in the face and the goal is not yet defined
             self.goalArticleMsg = await ctx.send("The article to find is: {}".format(self.currentRun.endArticle))
             await self.goalArticleMsg.edit(suppress=True)
@@ -61,7 +61,7 @@ class WikipediaSpeedrun(commands.Cog):
         
     @commands.command(brief="Starts the run", help="Atleast two competitors are needed to start a race.")
     async def start(self, ctx):
-        x = self.currentRun.startRace(ctx)
+        x = self.currentRun.startRace()
         if x == 0: # If there isnt enough players
             await ctx.send("Not enough competitors <:Spand:619148485379358739>", delete_after=15)
         elif x == 1: # If the goal is not defined
@@ -73,7 +73,7 @@ class WikipediaSpeedrun(commands.Cog):
 
     @commands.command(help="Ends the run and announces winner + elapsed time")
     async def done(self, ctx):
-        x = self.currentRun.endRace(ctx)
+        x = self.currentRun.endRace(ctx.message.author.display_name)
         if x == 0:
             await ctx.send("{} is the winner! Finding the article in: {}".format(ctx.message.author.display_name, self.currentRun.finalTime), delete_after=30)
             self.currentRun = Speedrun()
@@ -106,30 +106,30 @@ class Speedrun():
             else:
                 break
 
-    def addCompetitor(self, ctx):
-        if ctx.message.author.display_name in self.participants:
+    def addCompetitor(self, name):
+        if name in self.participants:
             return 0
         else:
-            self.participants.append(ctx.message.author.display_name)
+            self.participants.append(name)
             return 1
 
-    def removeCompetitor(self, ctx):
-        if ctx.message.author.display_name not in self.participants:
+    def removeCompetitor(self, name):
+        if name not in self.participants:
             return 0
         else:
-            self.participants.remove(ctx.message.author.display_name)
+            self.participants.remove(name)
             return 1
 
-    def setGoalArticle(self, ctx):
-        if ctx.message.author.display_name in self.participants and self.endArticle == None:
-            self.endArticle = ctx.message.content.replace("!goal", "")
+    def setGoalArticle(self, name, endArticle):
+        if name in self.participants and self.endArticle == None:
+            self.endArticle = endArticle
             return 0
         elif self.endArticle != None:
             return 1
-        elif ctx.message.author.display_name not in self.participants:
+        elif name not in self.participants:
             return 2   
 
-    def startRace(self, ctx):
+    def startRace(self):
         if len(self.participants) < 2:
             return 0
         elif self.endArticle == None:
@@ -138,10 +138,10 @@ class Speedrun():
             self.startingTime = datetime.datetime.now()
             return 2
 
-    def endRace(self, ctx):
-        if ctx.message.author.display_name in self.participants:
+    def endRace(self, name):
+        if name in self.participants:
             self.formatTime()
-            self.winner = ctx.message.author.display_name
+            self.winner = name
             self.saveRunToDatabase()
             return 0
 
@@ -156,7 +156,6 @@ class Speedrun():
             minutes, secondsLeft = divmod(secondsLeft, 60)
         self.finalTime=('%02d:%02d:%02d'%(hours,minutes,secondsLeft))
 
-        
     def saveRunToDatabase(self):
         run = {"Participants": self.participants,
                "Starting article": self.startingArticle,
