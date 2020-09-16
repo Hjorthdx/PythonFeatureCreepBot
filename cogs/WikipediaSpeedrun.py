@@ -91,7 +91,6 @@ class Speedrun():
     def __init__(self):
         self.participants = []
         self.startingTime = None
-        self.finishTime = None
         self.finalTime = None
         self.startingArticle = self.getStartingArticle()
         self.endArticle = None
@@ -141,12 +140,23 @@ class Speedrun():
 
     def endRace(self, ctx):
         if ctx.message.author.display_name in self.participants:
-            self.finishTime = datetime.datetime.now()
-            self.finalTime = self.finishTime - self.startingTime
+            self.formatTime()
             self.winner = ctx.message.author.display_name
             self.saveRunToDatabase()
             return 0
 
+    def formatTime(self):
+        x = datetime.datetime.now() - self.startingTime
+        secondsLeft = x.total_seconds()
+        hours = 0
+        minutes = 0
+        if secondsLeft > 3600:
+            hours, secondsLeft = divmod(secondsLeft, 3600)
+        if secondsLeft > 60:
+            minutes, secondsLeft = divmod(secondsLeft, 60)
+        self.finalTime=('%02d:%02d:%02d'%(hours,minutes,secondsLeft))
+
+        
     def saveRunToDatabase(self):
         run = {"Participants": self.participants,
                "Starting article": self.startingArticle,

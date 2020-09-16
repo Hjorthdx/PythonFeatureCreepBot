@@ -74,8 +74,6 @@ class Karma(commands.Cog):
                     if user.strUserID == authorID:
                         user.AddNeddut()
 
-        #self.updateHighscore()
-    
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
         if payload.channel_id == self.migmigChannel:
@@ -99,28 +97,6 @@ class Karma(commands.Cog):
                 for user in self.users:
                     if user.strUserID == authorID:
                         user.removeNeddut()
-
-        #self.updateHighscore()
-
-    # High score idea
-    # Just typing out idea before I'm done for today.
-    # None of this fucking works.
-    def updateHighscore(self):
-        #mostLiked = Db.mycol.create_index([('Opdutter', pymongo.ASCENDING)])
-        #highestValue = -1
-        #mostLiked = None
-        #for item in Db.mycol:
-        #    if item.Opdutter > highestValue:
-        #        highestValue = item.opdutter
-        #        mostLiked = item
-        
-        #print(mostLiked)
-
-        #mostLiked = Db.mycol.find(max="Opdutter")
-        #print(mostLiked)
-        #mostDisliked = Db.mycol.find({"number": {"$gt": 1}}).sort({"Neddutter": 1})
-        #print(mostDisliked)
-        print("Not implemented1")
 
 def setup(bot):
     bot.add_cog(Karma(bot))
