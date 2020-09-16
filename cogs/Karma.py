@@ -6,12 +6,15 @@ import Db, User
 
 
 class Karma(commands.Cog):
+    # Some documentation
+    
     def __init__(self, bot):
         self.bot = bot
 
         # Emotes
         self.kurtApproved = 619818932475527210
         self.kurtDisapproved = 651028634945060864
+        self.migmigChannel = 619105859615719434
 
         # Instantiating all the users
         Adil = User.User('Adil', 100552145421467648, '100552145421467648')
@@ -49,7 +52,7 @@ class Karma(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
-        if payload.channel_id == 619105859615719434: 
+        if payload.channel_id == self.migmigChannel: 
             if payload.emoji.id == self.kurtApproved:
                 message = await self.bot.http.get_message(payload.channel_id, payload.message_id) # Dictionary
                 authorDict = message["author"]
@@ -70,10 +73,12 @@ class Karma(commands.Cog):
                 for user in self.users:
                     if user.strUserID == authorID:
                         user.AddNeddut()
+
+        #self.updateHighscore()
     
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
-        if payload.channel_id == 619105859615719434:
+        if payload.channel_id == self.migmigChannel:
             if payload.emoji.id == self.kurtApproved:
                 message = await self.bot.http.get_message(payload.channel_id, payload.message_id) # Dictionary
                 authorDict = message["author"]
@@ -95,6 +100,27 @@ class Karma(commands.Cog):
                     if user.strUserID == authorID:
                         user.removeNeddut()
 
+        #self.updateHighscore()
+
+    # High score idea
+    # Just typing out idea before I'm done for today.
+    # None of this fucking works.
+    def updateHighscore(self):
+        #mostLiked = Db.mycol.create_index([('Opdutter', pymongo.ASCENDING)])
+        #highestValue = -1
+        #mostLiked = None
+        #for item in Db.mycol:
+        #    if item.Opdutter > highestValue:
+        #        highestValue = item.opdutter
+        #        mostLiked = item
+        
+        #print(mostLiked)
+
+        #mostLiked = Db.mycol.find(max="Opdutter")
+        #print(mostLiked)
+        #mostDisliked = Db.mycol.find({"number": {"$gt": 1}}).sort({"Neddutter": 1})
+        #print(mostDisliked)
+        print("Not implemented1")
 
 def setup(bot):
     bot.add_cog(Karma(bot))

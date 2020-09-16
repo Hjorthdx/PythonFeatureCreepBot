@@ -4,6 +4,7 @@ myClient = pymongo.MongoClient("mongodb://localhost:27017")
 mydb = myClient["mydatabase"]
 mycol = mydb["UserKarma"]
 pomodoroCol = mydb["Pomodoro"]
+wikipediaSpeedrunCol = mydb["WikipediaSpeedrun"]
 
 for document in mycol.find():
     print(document)  

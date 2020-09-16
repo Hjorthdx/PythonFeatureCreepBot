@@ -7,19 +7,22 @@ bot = commands.Bot(command_prefix='!')
 
 @bot.command(hidden=True)
 async def load(ctx, extension):
-    bot.load_extension(f'cogs.{extension}')
-    await ctx.message.delete()
+    if ctx.author.id == 140195461519769601:
+        bot.load_extension(f'cogs.{extension}')
+        await ctx.message.delete()
 
 @bot.command(hidden=True)
 async def unload(ctx, extension):
-    bot.unload_extension(f'cogs.{extension}')
-    await ctx.message.delete()
+    if ctx.author.id == 140195461519769601:
+        bot.unload_extension(f'cogs.{extension}')
+        await ctx.message.delete()
 
 @bot.command(hidden=True)
 async def reload(ctx, extension):
-    bot.unload_extension(f'cogs.{extension}')
-    bot.load_extension(f'cogs.{extension}')
-    await ctx.message.delete()
+    if ctx.author.id == 140195461519769601:
+        bot.unload_extension(f'cogs.{extension}')
+        bot.load_extension(f'cogs.{extension}')
+        await ctx.message.delete()
 
 @bot.event
 async def on_ready():

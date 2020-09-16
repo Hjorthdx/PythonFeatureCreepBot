@@ -39,16 +39,13 @@
     Database skal sættes op til at være online - lav prio.
 
     # Wikipedia speedrun
-        https://en.wikipedia.org/wiki/special:random - Gives a random wikipedia article
-        Let players join the game before it starts.
-        Start a timer on !start command
-        !done command, that returns the time it has run.
-            Possibly save this in database so we can have roles for this aswell.
         Et array med mulige ting vi skal finde - !add til listen.
-        '
 
 Add timer per user instead of name.
 
+
+# For the image editor thingy
+    pip install Pillow
 
 # Notes to self
     # Help command
