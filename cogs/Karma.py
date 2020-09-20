@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import sys
 sys.path.insert(0,"C:/Users/Sren/Documents/GitHub/DiscordKarmaBot")
-import Db, User
+import Db, User #pylint: disable=import-error
 
 
 class Karma(commands.Cog):

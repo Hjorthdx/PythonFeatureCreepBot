@@ -1,7 +1,7 @@
 import unittest, datetime
 import sys
 sys.path.insert(0,"C:/Users/Sren/Documents/GitHub/DiscordKarmaBot/cogs")
-import WikipediaSpeedrun
+import WikipediaSpeedrun #pylint: disable=import-error
 
 class TestSpeedrun(unittest.TestCase):
     def test_addCompetitor_emptyList(self):

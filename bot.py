@@ -28,7 +28,7 @@ async def reload(ctx, extension):
 async def on_ready():
     print(f'{bot.user} has connected to Discord!')
 
-for filename in os.listdir('./DiscordKarmaBot/cogs'):
+for filename in os.listdir('c:/Users/Sren/Documents/GitHub/DiscordKarmaBot/cogs'):
     if filename.endswith('.py'):
         bot.load_extension(f'cogs.{filename[:-3]}')
 
