@@ -19,34 +19,38 @@ class Pomodoro(commands.Cog):
 
     @commands.command(brief="Default value 50/10", help="!pomodoro x y, where x is work length and y is break length. Currently needs a name aswell, cause not fully operational yet. Working on it :D")
     async def pomodoro(self, ctx):
-        # The sound that needs to be played
-        pending_command = self.bot.get_command("PlayPomodoro")
-
-        # Get lengths of pomdoro timer
+        playcmd = self.bot.get_command("PlayPomodoro")
         workLength, breakLength = self.getLengthsFromMessage(ctx.message)
-
-        x = ctx.message.content.replace("!pomodoro", "")
-        # Create new Timer object
-        newTimer = Timer(x, workLength, breakLength, pending_command)
-
-        # Formats the time data
-        # Perhabs make this a function, so I don't have to look at it as Kurt would say.
-        x = newTimer.startingTime + datetime.timedelta(seconds=workLength)
-        if x.minute <= 9:
-            workEndTime = "{}:{}:{}".format(x.hour, int(str(0) + str(x.minute)), x.second)
-        else:
-            workEndTime = "{}:{}:{}".format(x.hour, x.minute, x.second)
-        
-        y = newTimer.startingTime + datetime.timedelta(seconds=workLength + breakLength)
-        if y.minute <= 9:
-            breakEndTime = "{}:{}:{}".format(y.hour, int(str(0) + str(y.minute)), y.second)
-        else:
-            breakEndTime = "{}:{}:{}".format(y.hour, y.minute, y.second)
-
-        # Informs the user that a pomodoro has begun
+        x = ctx.message.content.replace(".pomodoro", "")
+        newTimer = Timer(x, workLength, breakLength)
+        workEndTime, breakEndTime = self.formatTime(workLength, breakLength, newTimer)
         await ctx.send("Timer name: {} \nStarting timers: {} / {} minutes. \nWork ends at {} \nBreak ends at {}".format(newTimer.name, workLength / 60, breakLength / 60, workEndTime, breakEndTime), delete_after=newTimer.workLength + newTimer.breakLength)
         self.currentTimers.append(newTimer)
-        await newTimer.startTimer(ctx)
+
+        await newTimer.workTimer()
+        await ctx.send("Works over! Break starts now", delete_after=breakLength)
+        if ctx.voice_client is None:
+            if ctx.author.voice:
+                await ctx.author.voice.channel.connect()
+        await ctx.invoke(playcmd)
+        while ctx.voice_client.is_playing():
+            await asyncio.sleep(1)
+
+        if ctx.voice_client is not None:
+            await ctx.voice_client.disconnect()
+        
+        await newTimer.breakTimer()
+        await ctx.send("Breaks over!", delete_after=15)
+        if ctx.voice_client is None:
+            if ctx.author.voice:
+                await ctx.author.voice.channel.connect()
+        await ctx.invoke(playcmd)
+        while ctx.voice_client.is_playing():
+            await asyncio.sleep(1)
+
+        if ctx.voice_client is not None:
+            await ctx.voice_client.disconnect()
+
         await ctx.message.delete()
 
     def getLengthsFromMessage(self, message):
@@ -60,9 +64,24 @@ class Pomodoro(commands.Cog):
         else:
             print("Something went wrong.")
 
+    def formatTime(self, workLength, breakLength, newTimer):
+        x = newTimer.startingTime + datetime.timedelta(seconds=workLength)
+        if x.minute <= 9:
+            workEndTime = "{}:{}:{}".format(x.hour, int(str(0) + str(x.minute)), x.second)
+        else:
+            workEndTime = "{}:{}:{}".format(x.hour, x.minute, x.second)
+        
+        y = newTimer.startingTime + datetime.timedelta(seconds=workLength + breakLength)
+        if y.minute <= 9:
+            breakEndTime = "{}:{}:{}".format(y.hour, int(str(0) + str(y.minute)), y.second)
+        else:
+            breakEndTime = "{}:{}:{}".format(y.hour, y.minute, y.second)
+
+        return workEndTime, breakEndTime
+
     @commands.command(name='time', brief="Remaining time on pomodoro timer", help="!time timerName, currently needs this timer name cause its not fully operational yet :D")
     async def _time(self, ctx):
-        x = ctx.message.content.replace("!time", "")
+        x = ctx.message.content.replace(".time", "")
         neededTimer = self.currentTimers[0]
         for timer in self.currentTimers:
             if x == timer.name:
@@ -87,37 +106,25 @@ def setup(bot):
 import datetime, asyncio
 
 class Timer():
-    def __init__(self, name, workLength, breakLength, pending_command):
+    def __init__(self, name, workLength, breakLength):
         self.name = name
         self.workLength = workLength
         self.breakLength = breakLength
         self.startingTime = datetime.datetime.now()
         self.workBool = True
-        self.pending_command = pending_command
 
-    async def startTimer(self, ctx):
-        await self.workTimer(self.workLength)
-        await ctx.send("Works over! Break starts now", delete_after=self.breakLength)
-        await ctx.invoke(self.pending_command)
-        
-        await self.breakTimer(self.breakLength)
-        await ctx.send("Breaks over!", delete_after=15)
-        await ctx.invoke(self.pending_command)
-
-    async def workTimer(self, workLength):
+    async def workTimer(self):
         self.workBool = True
-        await asyncio.sleep(workLength)
-        # Adds the work duration to the database.
-        workPomodoro = {"Work duration:": workLength / 60,
+        await asyncio.sleep(self.workLength)
+        workPomodoro = {"Work duration:": self.workLength / 60,
                         "Work bool": self.workBool,
                         "Starting time": self.startingTime}
         Db.pomodoroCol.insert_one(workPomodoro)
 
-    async def breakTimer(self, breakLength):
+    async def breakTimer(self):
         self.workBool = False
-        await asyncio.sleep(breakLength)
-        # Adds the break duration to the database.
-        breakPomodoro = {"Break duration:": breakLength / 60,
+        await asyncio.sleep(self.breakLength)
+        breakPomodoro = {"Break duration:": self.breakLength / 60,
                         "Work bool": self.workBool,
                         "Starting time": self.startingTime}
         Db.pomodoroCol.insert_one(breakPomodoro)

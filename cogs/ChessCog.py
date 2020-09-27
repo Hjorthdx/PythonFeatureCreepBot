@@ -65,6 +65,11 @@ class Chess(commands.Cog):
 
         await ctx.message.delete()
 
+    @commands.command()
+    async def resetChess(self, ctx):
+        await self.Reset()
+        await ctx.message.delete()
+
     def getpng(self, flipped):
         data = chess.svg.board(self.board, flipped=flipped)
         svg2png(bytestring=data, write_to="board.png")

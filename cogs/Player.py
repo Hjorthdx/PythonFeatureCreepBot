@@ -34,11 +34,12 @@ class Player(commands.Cog):
     @commands.command(help="Shows all the current mp3 files")
     async def available(self, ctx):
         availableMp3Files = "```"
-        for filename in os.listdir('./DiscordKarmaBot/mp3-files'):
+        for filename in os.listdir('c:/Users/Sren/Documents/GitHub/DiscordKarmaBot/mp3-files'):
             if filename.endswith('.mp3'):
                 availableMp3Files += f"{filename[:-4]}\n"
         availableMp3Files+="```"
         await ctx.send(availableMp3Files, delete_after=15)
+        await ctx.message.delete()
 
     @commands.command(brief="Changes the volume the bot is playing", help="I.e. !volume 60 sets the volume to 60%")
     async def volume(self, ctx, volume: int):
@@ -51,10 +52,18 @@ class Player(commands.Cog):
 
     # Was the join command before. Just renamed for now until further notice with the wikipedia speedrun
     @commands.command(help="Makes the bot join a desired voice channel")
-    async def connect(self, ctx, *, channel: discord.VoiceChannel):
+    async def connect(self, ctx, *, channel: discord.VoiceChannel = None):
         if ctx.voice_client is not None:
-            return await ctx.voice_client.move_to(channel)
+            await ctx.voice_client.move_to(channel)
+            await ctx.message.delete()
+            return
         
+        if channel is None:
+            if ctx.author.voice:
+                await ctx.author.voice.channel.connect()
+                await ctx.message.delete()
+                return
+                
         await channel.connect()
         await ctx.message.delete()
 
@@ -63,8 +72,15 @@ class Player(commands.Cog):
         await ctx.voice_client.disconnect()
         await ctx.message.delete()
 
+    
+    @commands.command(help="Command for the Pomodoro cog to utilize", self_bot=True, hidden=True)
+    async def PlayPomodoro(self, ctx):
+        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.basePath + "Lyt nu.mp3"))
+        ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+
     @play.before_invoke
     @yt.before_invoke
+    @PlayPomodoro.before_invoke
     async def ensure_voice(self, ctx):
         if ctx.voice_client is None:
             if ctx.author.voice:
@@ -77,17 +93,13 @@ class Player(commands.Cog):
 
     @play.after_invoke
     @yt.after_invoke
+    @PlayPomodoro.after_invoke
     async def ensure_left_voice(self, ctx):
         while ctx.voice_client.is_playing():
             await asyncio.sleep(1)
 
         if ctx.voice_client is not None:
             await ctx.voice_client.disconnect()
-
-    @commands.command(help="Command for the Pomodoro cog to utilize", self_bot=True, hidden=True)
-    async def PlayPomodoro(self, ctx):
-        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.basePath + "Lyt nu.mp3"))
-        ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
 def setup(bot):
     bot.add_cog(Player(bot))

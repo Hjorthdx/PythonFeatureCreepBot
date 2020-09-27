@@ -13,7 +13,7 @@ class Project(commands.Cog):
 
     @commands.command(help="Trello link")
     async def trello(self, ctx):
-        await ctx.message.channel.send("https://trello.com/b/HfvQdIw0/p4-main-board", delete_after=15)
+        await ctx.message.channel.send("https://trello.com/b/iFsYL4QH/weight-completion", delete_after=15)
         await ctx.message.delete()
 
     @commands.command(help="Rapport link")

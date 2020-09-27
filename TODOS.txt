@@ -44,6 +44,22 @@
 Add timer per user instead of name.
 
 
+Fix pomodoro
+    Needs more seperation of concern
+    Seperate everything, so that unit tests can be developed
+        Create the unit tests so we can ensure that they dont fail like they do now.
+    Fix the remaining time command. Should give an error is negative time
+        Doesnt do that now, just tells there is -x time left on the timer.
+
+Add remind me feature
+    Checks if any current remind me's are stored. If so
+        Check if its past the reminder
+        Start countdown again if still time left
+    Store a reminder in db and start a countdown.
+
+
+
+
 # For the image editor thingy
     pip install Pillow
 
