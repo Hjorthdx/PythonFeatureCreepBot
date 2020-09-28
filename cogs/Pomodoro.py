@@ -17,7 +17,7 @@ class Pomodoro(commands.Cog):
     async def on_ready(self):
         print("Pomodoro cog is loaded")
 
-    @commands.command(brief="Default value 50/10", help="!pomodoro x y, where x is work length and y is break length. Currently needs a name aswell, cause not fully operational yet. Working on it :D")
+    @commands.command(brief="Default value 50/10", help="!pomodoro x y, where x is work length and y is break length.", aliases=['p'])
     async def pomodoro(self, ctx):
         playcmd = self.bot.get_command("PlayPomodoro")
         workLength, breakLength = self.getLengthsFromMessage(ctx.message)

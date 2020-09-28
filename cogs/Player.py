@@ -22,7 +22,7 @@ class Player(commands.Cog):
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
         await ctx.message.delete()
 
-    @commands.command(help="!yt youtube link")
+    @commands.command(help="!yt youtube link", aliases=['youtube'])
     async def yt(self, ctx, *, url):
         async with ctx.typing():
             player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
@@ -41,7 +41,7 @@ class Player(commands.Cog):
         await ctx.send(availableMp3Files, delete_after=15)
         await ctx.message.delete()
 
-    @commands.command(brief="Changes the volume the bot is playing", help="I.e. !volume 60 sets the volume to 60%")
+    @commands.command(brief="Changes the volume the bot is playing", help="I.e. !volume 60 sets the volume to 60%", aliases=['v'])
     async def volume(self, ctx, volume: int):
         if ctx.voice_client is None:
             return await ctx.send("Not connected to a voice channel.")
@@ -71,7 +71,6 @@ class Player(commands.Cog):
     async def stop(self, ctx):
         await ctx.voice_client.disconnect()
         await ctx.message.delete()
-
     
     @commands.command(help="Command for the Pomodoro cog to utilize", self_bot=True, hidden=True)
     async def PlayPomodoro(self, ctx):

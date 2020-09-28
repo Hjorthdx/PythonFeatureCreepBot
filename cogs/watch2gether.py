@@ -14,7 +14,7 @@ class Watch2gether(commands.Cog):
     async def on_ready(self):
         print("Watch2gether cog is loaded")
 
-    @commands.command(help="Returnerer et watch2gether rum med den linkede video", brief = "!watch youtubelink")
+    @commands.command(help="Creates a watch2gether room and automatically puts on the youtube video that was linked with the command.", brief = "returns watch2gether room with youtube video", aliases=['w2g','watch2gether'])
     async def watch(self, ctx):
         url = ctx.message.content.replace("!watch", "")
         await ctx.message.delete()

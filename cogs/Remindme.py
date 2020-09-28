@@ -12,23 +12,29 @@ class Remindme(commands.Cog):
     async def on_ready(self):
         print("Remindme cog is loaded")
 
-    @commands.command(help="Test")
+    @commands.command(brief="Reminds you about something", help="Only accepts days, hours, minutes, seconds rn. \nE.g. 1 day 2 hours 3 minutes 4 seconds")
     async def remindme(self, ctx, time, text):
         if text is None:
             await ctx.send("No reminder text specified", delete_after=15)
         newReminder = reminder(time, text)
         self.reminders.append(newReminder)
-        await ctx.send("I will remind you about {} in {}.".format(newReminder.text, newReminder.time))
+        await ctx.send("I will remind you about {} in {}.".format(newReminder.text, newReminder.time), delete_after=15)
         await newReminder.startReminder()
-        await ctx.send("{}, you asked me to remind you about {}, {} ago.".format(ctx.author.name, text, time))
+        await ctx.send("{}, you asked me to remind you about {}, {} ago.".format(ctx.author.name, text, time), delete_after=15)
+        self.reminders.remove(newReminder)
+        await ctx.message.delete()
 
-    @commands.command()
+    @commands.command(brief="Not implemented")
     async def currentReminders(self, ctx):
         await ctx.send("Throw new not implemented yet :P", delete_after=15)
 
-    @commands.command()
+    @commands.command(brief="Not implemented")
     async def unremindme(self, ctx):
         await ctx.send("Throw new not implemented yet :D", delete_after=15)
+
+    @commands.command(brief="Not implemented")
+    async def remind(self, ctx, *, user):
+        await ctx.send("Throw new not implemented yet xD", delete_after=15)
         
 
 def setup(bot):

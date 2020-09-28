@@ -36,9 +36,9 @@ class Karma(commands.Cog):
     async def on_ready(self):
         print("Karma cog is loaded")  
 
-    @commands.command(help="i.e. !karma Hjorth")
+    @commands.command(help="i.e. .karma Hjorth")
     async def karma(self, ctx):
-        if ctx.message.content == "!karma":
+        if ctx.message.content == ".karma":
             for user in self.users:
                 if ctx.message.author.id == user.intUserID:
                     x = Db.mycol.find_one({ "Name": user.name })
