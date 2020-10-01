@@ -8,6 +8,9 @@ import nltk
 import random
 import  re
 
+# Remove none used imports
+# Hint command ?
+
 # Come up with better name for this cog
 # DictionaryCog ?
 class DictionaryCog(commands.Cog):
@@ -38,7 +41,7 @@ class DictionaryCog(commands.Cog):
         print("Random word is:{}".format(self.randomWord))
         if re.search(r'\b{}\b'.format(userGuess), self.wordsList):
             if userGuess == self.randomWord:
-                await ctx.send("You found the word! Congratz", delete_after=15)
+                await ctx.send("The word was indeed {}! Congratz {} you got it".format(self.randomWord, ctx.author.name), delete_after=15)
                 await self.guessedWordsMsg.delete()
                 self.guessedWordsMsg = None
                 self.randomWord = random.choice(list(open(self.easyWordsListPath))).rstrip("\n")
@@ -69,7 +72,7 @@ class DictionaryCog(commands.Cog):
             
         await ctx.message.delete()
 
-    @commands.command(aliases=['abc', 'alph'])
+    @commands.command(brief="Prints out the alphabet for your convenience", aliases=['abc', 'alph'])
     async def alphabet(self, ctx):
         await ctx.send("A B C D E F G H I J K L M N O P Q R S T U V W X Y Z", delete_after=15)
         await ctx.message.delete()
@@ -91,7 +94,11 @@ class DictionaryCog(commands.Cog):
              for name in syn.lemma_names():
                  synonymsForWord.append(name)
 
-        await ctx.send("Synonyms for: {}\n{}".format(word, synonymsForWord), delete_after=15)
+        for x in synonymsForWord:
+            if x == word:
+                synonymsForWord.remove(x)
+
+        await ctx.send("Synonyms for: {}\n{}".format(word, synonymsForWord), delete_after=45)
         await ctx.message.delete()
 
     @commands.command(brief="Returns antonyms", help=" e.g. .antonyms good, would return antonyms for the word good.", aliases=['antonym'])
@@ -102,13 +109,17 @@ class DictionaryCog(commands.Cog):
                 if l.antonyms(): 
                     antonymsForWord.append(l.antonyms()[0].name()) 
 
-        await ctx.send("Antonyms for: {}\n{}".format(word, antonymsForWord), delete_after=15)
+        for x in antonymsForWord:
+            if x == word:
+                antonymsForWord.remove(x)
+
+        await ctx.send("Antonyms for: {}\n{}".format(word, antonymsForWord), delete_after=45)
         await ctx.message.delete()
 
     @commands.command(brief="Returns definition of a word", aliases=['getDefinition', 'getdef', 'def'])
     async def definition(self, ctx, *, word):
         syns = wordnet.synsets(word)
-        await ctx.send("Definition of {} is:\n{}".format(word, syns[0].definition()), delete_after=15)
+        await ctx.send("Definition of {} is:\n{}".format(word, syns[0].definition()), delete_after=15) # Går nogengange out of index range.
         await ctx.message.delete()
 
 def setup(bot):

@@ -36,7 +36,7 @@ class WikipediaSpeedrun(commands.Cog):
     async def leave(self, ctx):
         x = self.currentRun.removeCompetitor(ctx.message.author.display_name)
         if x == 0: # If player is not the in the race
-            ctx.send("{}, you are not in the race!".format(ctx.message.author.display_name), delete_after=15)
+            await ctx.send("{}, you are not in the race!".format(ctx.message.author.display_name), delete_after=15)
         else:
             if len(self.currentRun.participants) == 0: # If there is no players left in the race
                 await self.currentPlayerMsg.delete()
@@ -47,7 +47,7 @@ class WikipediaSpeedrun(commands.Cog):
                 await self.currentPlayerMsg.edit(content="Current players are: \n{}".format(self.currentRun.participants))
         await ctx.message.delete()
 
-    @commands.command(brief="!goal article link")
+    @commands.command(brief="Goal article link")
     async def goal(self, ctx):
         x = self.currentRun.setGoalArticle(ctx.message.author.display_name, ctx.message.content.replace("!goal", ""))
         if x == 0: # If the player is in the face and the goal is not yet defined

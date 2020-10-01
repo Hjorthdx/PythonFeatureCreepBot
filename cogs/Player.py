@@ -1,34 +1,44 @@
 import discord, os
 from discord.ext import commands
 
-# TO do
-# Queue
-
 class Player(commands.Cog):
     # Some documentation
 
     def __init__(self, bot):
         self.bot = bot
         self.basePath = "C:/Users/Sren/Documents/GitHub/DiscordKarmaBot/mp3-files/"
+        self.queue = asyncio.Queue()
+        self.ctxList = []
+        self.next = asyncio.Event()
+        self.bot.loop.create_task(self.audioPlayerTask())
 
     @commands.Cog.listener()
     async def on_ready(self):
         print("Player cog is loaded")
 
-    @commands.command(brief="!play slet dem. !available for list of all mp3's")
+    async def audioPlayerTask(self):
+        while True:
+            self.next.clear()
+            currentSong = await self.queue.get()
+            ctx = self.ctxList.pop(0)
+            async with ctx.typing():
+                x = await YTDLSource.from_url(currentSong, loop=self.bot.loop, stream=True)
+                ctx.voice_client.play(x, after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
+            await ctx.send('Now playing: {}'.format(x.title), delete_after=x.duration)
+            await self.next.wait()
+
+    # Not changed to the queue system yet. So this will likely break if tried while bot is already playing something.
+    @commands.command(brief="play slet dem. !available for list of all mp3's")
     async def play(self, ctx, *, userInput):
         mp3 = self.basePath + userInput + ".mp3"
         source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(mp3))
         ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
         await ctx.message.delete()
 
-    @commands.command(help="!yt youtube link", aliases=['youtube'])
+    @commands.command(help="yt youtube link", aliases=['youtube'])
     async def yt(self, ctx, *, url):
-        async with ctx.typing():
-            player = await YTDLSource.from_url(url, loop=self.bot.loop, stream=True)
-            ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
-
-        await ctx.send('Now playing: {}'.format(player.title), delete_after=player.duration)
+        await self.queue.put(url)
+        self.ctxList.append(ctx)
         await ctx.message.delete()
 
     @commands.command(help="Shows all the current mp3 files")
@@ -50,7 +60,6 @@ class Player(commands.Cog):
         await ctx.send("Changed volume to {}%".format(volume), delete_after=15)
         await ctx.message.delete()
 
-    # Was the join command before. Just renamed for now until further notice with the wikipedia speedrun
     @commands.command(help="Makes the bot join a desired voice channel")
     async def connect(self, ctx, *, channel: discord.VoiceChannel = None):
         if ctx.voice_client is not None:
@@ -71,11 +80,34 @@ class Player(commands.Cog):
     async def stop(self, ctx):
         await ctx.voice_client.disconnect()
         await ctx.message.delete()
+
+    @commands.command(brief="Pauses the current song")
+    async def pause(self, ctx):
+        ctx.voice_client.pause()
+        await ctx.send("Paused", delete_after=15)
+        await ctx.message.delete()
+
+    @commands.command(brief="Resumes the current song")
+    async def resume(self, ctx):
+        ctx.voice_client.resume()
+        await ctx.send("Resumed", delete_after=15)
+        await ctx.message.delete()
     
     @commands.command(help="Command for the Pomodoro cog to utilize", self_bot=True, hidden=True)
     async def PlayPomodoro(self, ctx):
-        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.basePath + "Lyt nu.mp3"))
-        ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+        if ctx.voice_client.is_playing():
+            print("Pausing song to play pomodoro timer")
+            x = ctx.voice_client.source
+            ctx.voice_client.pause()
+            timerSound = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.basePath + "Lyt nu.mp3"))
+            ctx.voice_client.play(timerSound, after=lambda e: print('Player error: %s' % e) if e else None)
+            while ctx.voice_client.is_playing():
+                asyncio.sleep(1)
+            print("Trying to replay song")
+            ctx.voice_client.play(x, after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
+        else:    
+            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.basePath + "Lyt nu.mp3"))
+            ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
     @play.before_invoke
     @yt.before_invoke
@@ -87,18 +119,6 @@ class Player(commands.Cog):
             else:
                 await ctx.send("You are not connected to a voice channel.")
                 raise commands.CommandError("Author not connected to a voice channel.")
-        elif ctx.voice_client.is_playing():
-            ctx.voice_client.stop()
-
-    @play.after_invoke
-    @yt.after_invoke
-    @PlayPomodoro.after_invoke
-    async def ensure_left_voice(self, ctx):
-        while ctx.voice_client.is_playing():
-            await asyncio.sleep(1)
-
-        if ctx.voice_client is not None:
-            await ctx.voice_client.disconnect()
 
 def setup(bot):
     bot.add_cog(Player(bot))
@@ -147,3 +167,4 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         filename = data['url'] if stream else ytdl.prepare_filename(data)
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+

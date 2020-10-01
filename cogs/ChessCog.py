@@ -20,7 +20,7 @@ class Chess(commands.Cog):
     async def on_ready(self):
         print("Chess cog is loaded")
 
-    @commands.command(brief="Starts a new chess game", help="!startGame @user to start a game with the mentioned user")
+    @commands.command(brief="Starts a new chess game", help="startGame @user to start a game with the mentioned user")
     async def startGame(self, ctx):
         if self.white is not None and self.black is not None:
             return await ctx.send("Game already running", delete_after=15)

@@ -44,6 +44,7 @@ import asyncio
 
 class reminder():
     def __init__(self, time, text):
+        print(time)
         self.time = time
         self.text = text
         self.totalSeconds = self.calculateTotalSeconds()

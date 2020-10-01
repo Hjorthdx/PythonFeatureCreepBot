@@ -12,12 +12,24 @@ class Pomodoro(commands.Cog):
         self.defaultWorkTimer = 50
         self.defaultBreakTimer = 10
         self.currentTimers = []
+        self.testCounter = 0
 
     @commands.Cog.listener()
     async def on_ready(self):
         print("Pomodoro cog is loaded")
 
-    @commands.command(brief="Default value 50/10", help="!pomodoro x y, where x is work length and y is break length.", aliases=['p'])
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        if after.channel is None:
+            self.testCounter = self.testCounter - 1
+        else:
+            self.testCounter = self.testCounter + 1
+        
+        if self.testCounter >= 2 and not self.currentTimers:
+            x = self.bot.get_channel(619094316106907660)
+            await x.send("Pomodoro?", delete_after=300)
+
+    @commands.command(brief="Default value 50/10", help=".pomodoro x y, where x is work length and y is break length.", aliases=['p'])
     async def pomodoro(self, ctx):
         playcmd = self.bot.get_command("PlayPomodoro")
         workLength, breakLength = self.getLengthsFromMessage(ctx.message)
@@ -29,28 +41,24 @@ class Pomodoro(commands.Cog):
 
         await newTimer.workTimer()
         await ctx.send("Works over! Break starts now", delete_after=breakLength)
+        # Ensures voice. This is a "hack".
         if ctx.voice_client is None:
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()
         await ctx.invoke(playcmd)
+
         while ctx.voice_client.is_playing():
             await asyncio.sleep(1)
 
-        if ctx.voice_client is not None:
-            await ctx.voice_client.disconnect()
-        
         await newTimer.breakTimer()
         await ctx.send("Breaks over!", delete_after=15)
+
+        # Ensures voice. This is a "hack".
         if ctx.voice_client is None:
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()
         await ctx.invoke(playcmd)
-        while ctx.voice_client.is_playing():
-            await asyncio.sleep(1)
-
-        if ctx.voice_client is not None:
-            await ctx.voice_client.disconnect()
-
+        
         await ctx.message.delete()
 
     def getLengthsFromMessage(self, message):
@@ -79,7 +87,7 @@ class Pomodoro(commands.Cog):
 
         return workEndTime, breakEndTime
 
-    @commands.command(name='time', brief="Remaining time on pomodoro timer", help="!time timerName, currently needs this timer name cause its not fully operational yet :D")
+    @commands.command(name='time', brief="Remaining time on pomodoro timer", help="time timerName, currently needs this timer name cause its not fully operational yet :D")
     async def _time(self, ctx):
         x = ctx.message.content.replace(".time", "")
         neededTimer = self.currentTimers[0]
@@ -90,7 +98,7 @@ class Pomodoro(commands.Cog):
         await ctx.send("remaining time on timer {}: {}".format(neededTimer.name,remainingTime), delete_after=15)
         await ctx.message.delete()
 
-    @commands.command(help="!changeDefault work 50 e.g.")
+    @commands.command(help=".changeDefault work 50 e.g.")
     async def changeDefault(self, ctx):
         x = [int(s) for s in ctx.message.content.split() if s.isdigit()]
         if "work" in ctx.message.content:

@@ -1,6 +1,6 @@
 # TODO
     # General things
-        Tolower all user inputs, so they are not change sensitive.
+        Tolower all user inputs, so they are not case sensitive.
         Make installation guide to use the bot
 
     # USER CLASS
@@ -14,15 +14,6 @@
     # POMODORO PART
     User needs to be able to STOP the timer
     User needs to be able to PAUSE the timer
-    Make bot ask if you've forgotten to start timer. If there are like 5+ people in voice channel, then it should ask if a timer is needed
-        Could be very helpful cause we always forgot those stupid timers
-        https://discordpy.readthedocs.io/en/latest/api.html#voicechannel -> Members returns a list of all the users in a specific voice channel,
-            maybe have some loop.wait_for(members.count >= 7) -> if timer not started, ask user if they want a timer started.
-            https://discordpy.readthedocs.io/en/latest/api.html#discord.on_member_update USE THIS
-                TALKED TO SIMON ABOUT THIS. THIS SHOULD WORK
-    Comment inside pomodoro doucment needs to be done
-    @everyone when timers are up.
-    Needs to play in every room that there are peopple in
     When there is a break play the lofi radio
 
     # PLAY PART
@@ -32,14 +23,9 @@
     Boomer alert
     Lofi radio
 
-    Player class that has playing status. If playing - then add it to queue, so it doesnt cause error everytime multiple people play audio clip.
-    
-
     # DB
-    Database skal sættes op til at være online - lav prio.
-
-    # Wikipedia speedrun
-        Et array med mulige ting vi skal finde - !add til listen.
+    New database
+    postgres or w.e the thing from DBS course is telling us about. I'll try to use that for experience.
 
 Add timer per user instead of name.
 
@@ -57,11 +43,41 @@ Add remind me feature
         Start countdown again if still time left
     Store a reminder in db and start a countdown.
 
-
-
-
 # For the image editor thingy
     pip install Pillow
+
+# Youtube cog
+    https://developers.google.com/youtube/v3/guides/push_notifications
+    Notify when new upload from specific channel
+    search and return first (or x amount) of results from youtube search
+        perhabs embed information?
+
+# Graph cog
+    https://graph-tool.skewed.de/
+    Generate graph based on data
+        I imagine user inputs if they pillars or piechart or w.e and then gives the data
+            The cog then returns a message with teh graph as an embed.
+
+FIX ALLE BRIEF COMMENTS
+    De skal fortælle kort hvad commanden gør
+    Derefter skal alle help fixes
+        De skal så gå lidt mere i dybden
+            Like fx remind me kun modtager days, hours, minutes, seconds nu. Dette skal være info for help, hvor brief bare er den reminder dig om noget.
+        OG vise alle de aliases der er for den command. MEST DEN HER SOM HAR BRUG FOR AT BLIVE GJORT
+
+# WEATHER API COG
+    Tell the weather forecast.
+        Perhabs default x amount or y¨
+        ooutrewwet7´+8974q   specified
+
+Just wild idea
+    Kunne være fedt hvis man fik nogle point for alle de karma man får eller bare måske noget andet også (carsten upduts? who knows)
+        Hvis det kunne blive til en form for currency, som man så kunne bruge i et nyt cog
+        Så kunne jeg lave et casino cog, hvor man kunne gamble for de points.
+        Prøv at tænk of the possibilties
+            Poker, blackjack, en armet tyvknægt?, roulette.
+        OMG I LOVE THE IDEA.
+            Sikkert giga aids at lave fordi mit gamle kode er en smule rodet :)
 
 # Notes to self
     # Help command
