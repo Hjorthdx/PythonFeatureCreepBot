@@ -1,6 +1,7 @@
 import discord, requests, os
 from discord.ext import commands
 
+
 class Watch2gether(commands.Cog):
     # Some documentation
 
@@ -14,7 +15,9 @@ class Watch2gether(commands.Cog):
     async def on_ready(self):
         print("Watch2gether cog is loaded")
 
-    @commands.command(help="Creates a watch2gether room and automatically puts on the youtube video that was linked with the command.", brief = "returns watch2gether room with youtube video", aliases=['w2g','watch2gether'])
+    @commands.command(
+        help="Creates a watch2gether room and automatically puts on the youtube video that was linked with the command.",
+        brief="returns watch2gether room with youtube video", aliases=['w2g', 'watch2gether'])
     async def watch(self, ctx):
         url = ctx.message.content.replace("!watch", "")
         await ctx.message.delete()
@@ -25,8 +28,9 @@ class Watch2gether(commands.Cog):
         obj = {'share': request, 'api_key': self.API_key}
         x = requests.post(self.watch2gether_baselink, data=obj)
         y = x.json()
-        streamkey = y['streamkey']
-        return self.watch2gether_roomlink + streamkey
+        stream_key = y['streamkey']
+        return self.watch2gether_roomlink + stream_key
+
 
 def setup(bot):
     bot.add_cog(Watch2gether(bot))

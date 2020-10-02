@@ -31,7 +31,7 @@ class Pomodoro(commands.Cog):
 
     @commands.command(brief="Default value 50/10", help=".pomodoro x y, where x is work length and y is break length.", aliases=['p'])
     async def pomodoro(self, ctx):
-        playcmd = self.bot.get_command("PlayPomodoro")
+        playcmd = self.bot.get_command("play_pomodoro")
         workLength, breakLength = self.getLengthsFromMessage(ctx.message)
         x = ctx.message.content.replace(".pomodoro", "")
         newTimer = Timer(x, workLength, breakLength)
