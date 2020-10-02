@@ -1,4 +1,4 @@
-import os, discord
+import os, discord, Db
 from dotenv import load_dotenv
 from discord.ext import commands
 load_dotenv()

@@ -1,8 +1,8 @@
 import discord, datetime, wikipedia
 from discord.ext import commands
-import sys
-sys.path.insert(0,"C:/Users/Sren/Documents/GitHub/DiscordKarmaBot")
-import Db #pylint: disable=import-error
+#import sys
+#sys.path.insert(0,"C:/Users/Sren/Documents/GitHub/DiscordKarmaBot")
+#import Db #pylint: disable=import-error
 
 class WikipediaSpeedrun(commands.Cog):
     # Some documentation
@@ -161,4 +161,4 @@ class Speedrun():
                "Starting article": self.startingArticle,
                "Goal article": self.endArticle,
                "Winner": self.winner}
-        Db.wikipediaSpeedrunCol.insert_one(run)
+        #Db.wikipediaSpeedrunCol.insert_one(run)

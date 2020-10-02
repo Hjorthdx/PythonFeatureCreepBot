@@ -26,7 +26,7 @@ class Player(commands.Cog):
                 ctx.voice_client.play(x, after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
             await ctx.send('Now playing: {}'.format(x.title), delete_after=x.duration)
             await self.next.wait()
-
+       
     # Not changed to the queue system yet. So this will likely break if tried while bot is already playing something.
     @commands.command(brief="play slet dem. !available for list of all mp3's")
     async def play(self, ctx, *, userInput):
@@ -102,7 +102,7 @@ class Player(commands.Cog):
             timerSound = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.basePath + "Lyt nu.mp3"))
             ctx.voice_client.play(timerSound, after=lambda e: print('Player error: %s' % e) if e else None)
             while ctx.voice_client.is_playing():
-                asyncio.sleep(1)
+                await asyncio.sleep(1)
             print("Trying to replay song")
             ctx.voice_client.play(x, after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
         else:    

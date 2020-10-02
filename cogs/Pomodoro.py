@@ -1,8 +1,8 @@
 import discord
 from discord.ext import commands
-import sys
-sys.path.insert(0,"C:/Users/Sren/Documents/GitHub/DiscordKarmaBot")
-import Db #pylint: disable=import-error
+#import sys
+#sys.path.insert(0,"C:/Users/Sren/Documents/GitHub/DiscordKarmaBot")
+#import Db #pylint: disable=import-error
 
 class Pomodoro(commands.Cog):
     # Some documentation
@@ -22,7 +22,7 @@ class Pomodoro(commands.Cog):
     async def on_voice_state_update(self, member, before, after):
         if after.channel is None:
             self.testCounter = self.testCounter - 1
-        else:
+        elif before is None and after is not None:
             self.testCounter = self.testCounter + 1
         
         if self.testCounter >= 2 and not self.currentTimers:
@@ -46,9 +46,6 @@ class Pomodoro(commands.Cog):
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()
         await ctx.invoke(playcmd)
-
-        while ctx.voice_client.is_playing():
-            await asyncio.sleep(1)
 
         await newTimer.breakTimer()
         await ctx.send("Breaks over!", delete_after=15)
@@ -124,18 +121,18 @@ class Timer():
     async def workTimer(self):
         self.workBool = True
         await asyncio.sleep(self.workLength)
-        workPomodoro = {"Work duration:": self.workLength / 60,
-                        "Work bool": self.workBool,
-                        "Starting time": self.startingTime}
-        Db.pomodoroCol.insert_one(workPomodoro)
+        #workPomodoro = {"Work duration:": self.workLength / 60,
+        #                "Work bool": self.workBool,
+        #                "Starting time": self.startingTime}
+        #Db.pomodoroCol.insert_one(workPomodoro)
 
     async def breakTimer(self):
         self.workBool = False
         await asyncio.sleep(self.breakLength)
-        breakPomodoro = {"Break duration:": self.breakLength / 60,
-                        "Work bool": self.workBool,
-                        "Starting time": self.startingTime}
-        Db.pomodoroCol.insert_one(breakPomodoro)
+        #breakPomodoro = {"Break duration:": self.breakLength / 60,
+        #                "Work bool": self.workBool,
+        #                "Starting time": self.startingTime}
+        #Db.pomodoroCol.insert_one(breakPomodoro)
 
     def calculateRemainingTime(self):
         hours = 0

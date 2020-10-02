@@ -3,6 +3,11 @@
         Tolower all user inputs, so they are not case sensitive.
         Make installation guide to use the bot
 
+    # The generel plan of action.
+        Figure out how to use the user class
+            Perhabs just define them globally in bot I guess idk.
+            Add new functionality to the user class
+
     # USER CLASS
         Add default values for pomodoro timers, so every user can change their default with the !change default command.
         I think database, needs to keep track of the timer aswell, if that needs to be changed.

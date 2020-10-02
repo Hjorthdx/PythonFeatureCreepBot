@@ -8,25 +8,29 @@ class User:
         self.strUserID = strUserID
 
     def AddOpdut(self):
-        Db.mycol.update_one(
-            { "Name": self.name },
-            { "$inc": {"Opdutter": 1}}
-        )
+        print("Add opdut")
+        #Db.mycol.update_one(
+        #    { "Name": self.name },
+        #    { "$inc": {"Opdutter": 1}}
+        #)
 
     def removeOpdut(self):
-        Db.mycol.update_one(
-            { "Name": self.name },
-            { "$inc": {"Opdutter": -1}}
-        )
+        print("Remove opdut")
+        #Db.mycol.update_one(
+        #    { "Name": self.name },
+        #    { "$inc": {"Opdutter": -1}}
+        #)
 
     def AddNeddut(self):
-        Db.mycol.update_one(
-            { "Name": self.name },
-            { "$inc": {"Neddutter": 1}}
-        )
+        print("Add neddut")
+        #Db.mycol.update_one(
+        #    { "Name": self.name },
+        #    { "$inc": {"Neddutter": 1}}
+        #)
 
     def removeNeddut(self):
-        Db.mycol.update_one(
-            { "Name": self.name },
-            { "$inc": {"Neddutter": -1}}
-        )
+        print("Remove neddut")
+        #Db.mycol.update_one(
+        #    { "Name": self.name },
+        #    { "$inc": {"Neddutter": -1}}
+        #)
