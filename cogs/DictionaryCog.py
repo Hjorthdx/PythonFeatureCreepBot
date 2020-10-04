@@ -22,7 +22,7 @@ class DictionaryCog(commands.Cog):
         # Hard words list
         # self.wordsList = words.words()
         # self.randomWord = ''.join(sample(self.wordsList, 1))
-        self.easyWordsListPath = "C:/Users/Sren/Documents/GitHub/DiscordKarmaBot/easier_words.txt"
+        self.easyWordsListPath = "C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot/easier_words.txt"
         my_file = open(self.easyWordsListPath, 'r')
         self.wordsList = my_file.read()
         self.randomWord = random.choice(list(open(self.easyWordsListPath))).rstrip("\n")
@@ -133,7 +133,6 @@ class DictionaryCog(commands.Cog):
         await ctx.send("Definition of {} is:\n{}".format(word, syns[0].definition()),
                        delete_after=15)  # Går nogengange out of index range.
         await ctx.message.delete()
-
 
 def setup(bot):
     bot.add_cog(DictionaryCog(bot))

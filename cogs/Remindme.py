@@ -30,23 +30,24 @@ class Remindme(commands.Cog):
 
     @commands.command(name="currentReminders", brief="Not implemented")
     async def current_reminders(self, ctx):
-        await ctx.send("Throw new not implemented yet :P", delete_after=15)
+        await ctx.send("!say Throw new not implemented yet :P- en", delete_after=15)
+        await ctx.message.delete()
 
     @commands.command(brief="Not implemented")
     async def unremindme(self, ctx):
-        await ctx.send("Throw new not implemented yet :D", delete_after=15)
+        await ctx.send("!say Throw new not implemented yet :D -en", delete_after=15)
+        await ctx.message.delete()
 
-    @commands.command(brief="Not implemented")
+    @commands.command(brief="Not implemented 123")
     async def remind(self, ctx, *, user):
-        await ctx.send("Throw new not implemented yet xD", delete_after=15)
+        await ctx.send("!say Throw new not implemented yet xD -en", delete_after=15)
+        await ctx.message.delete()
 
 
 def setup(bot):
     bot.add_cog(Remindme(bot))
 
-
 import asyncio
-
 
 class reminder:
     def __init__(self, time, text):

@@ -3,6 +3,7 @@ from discord.ext import commands
 #import sys
 #sys.path.insert(0,"C:/Users/Sren/Documents/GitHub/DiscordKarmaBot")
 #import Db #pylint: disable=import-error
+#sys.path.insert(0,"C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot") INSTEAD OFC
 
 class Pomodoro(commands.Cog):
     # Some documentation

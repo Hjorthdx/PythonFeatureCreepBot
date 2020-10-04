@@ -1,25 +1,56 @@
-import psycopg2
-import psycopg2.extras
+import asyncio
+import asyncpg
 
-conn = psycopg2.connect(host="localhost", dbname="DiscordData", user="postgres", password="MD80N2N!fuHz")
 
-#with conn:
-#    with conn.cursor(cursor_factory=psycopg2.extras.DictCursor) as cur:
-#        cur.execute("CREATE TABLE user (id SERIAL PRIMARY KEY, name VARCHAR);")
-cur = conn.cursor()
-#sql = "CREATE TABLE Users (id SERIAL PRIMARY KEY, name VARCHAR(255) NOT NULL, discordID integer NOT NULL)"
-sql = "INSERT INTO Users(name) VALUES(%s) RETURNING user_id;"
-cur.execute(sql, ("Hjorth",))
-_id = cur.fetchone()[0]
+async def myfetch(query):
+    conn = await asyncpg.connect(user='postgres', password='MD80N2N!fuHz', database='DiscordData', host='127.0.0.1')
+    values = await conn.fetch(query)
+    await conn.close()
+    return values
 
-cur.close()
-
-conn.commit()
-
-conn.close()
+# Perhabs ? I'm not sure what is best. Both seem, I mean not so safe. Sql injection xd
+async def add_opdut(query):
+    sql_query = "UPDATE users SET opdutter = opdutter + 1 WHERE id=" + query
+    conn = await asyncpg.connect(user='postgres', password='MD80N2N!fuHz', database='DiscordData', host='127.0.0.1')
+    res = await conn.fetch(sql_query)
+    await conn.close()
+    return res
 
 
 
+
+
+
+
+'''
+from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, relationship
+import os
+
+Base = declarative_base()
+
+
+class Test(Base):
+    __tablename__ = "users"
+
+    id = Column('id', Integer, primary_key=True)
+    name = Column('name', String, unique=True)
+    discordID = Column('discordID', Integer)
+    opdutter = Column('opdutter', Integer)
+    neddutter = Column('neddutter', Integer)
+    prefWorkTimer = Column('prefWorkTimer', Integer)
+    prefBreakTimer = Column('prefBreakTimer', Integer)
+
+
+engine = create_engine(os.getenv("DB_CONNECT_STRING"))
+Session = sessionmaker(bind=engine)
+session = Session()
+
+session.commit()
+session.close()
+
+'''
 
 '''
 import pymongo

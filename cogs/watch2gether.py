@@ -31,6 +31,5 @@ class Watch2gether(commands.Cog):
         stream_key = y['streamkey']
         return self.watch2gether_roomlink + stream_key
 
-
 def setup(bot):
     bot.add_cog(Watch2gether(bot))

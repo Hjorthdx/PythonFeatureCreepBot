@@ -20,6 +20,9 @@ from discord.ext import commands
 # Perhabs an enum with the different times and a name for them. I.e. Noon = 12:00:00, midnight = 00:00:00 etc.
 # The same for the date = today = this date, tomorrow = today + 8 time intervals etc.
 
+# USE THE THING SIMON TALKES ABOUT TO MAKE CLASSES SO ITS NOT THIS SHIT TO ACCESS THE DIFFERENT ELEMENTS THAT WE GET BACK
+# USE DMI API INSTEAD
+
 class WeatherForecaster(commands.Cog):
     # Some documentation
 
@@ -60,7 +63,6 @@ class WeatherForecaster(commands.Cog):
         embed.add_field(name="Time", value=f"{time}", inline=False)
         await ctx.send(embed=embed, delete_after=30)
         await ctx.message.delete()
-
 
 def setup(bot):
     bot.add_cog(WeatherForecaster(bot))

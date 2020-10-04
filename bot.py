@@ -40,7 +40,7 @@ async def on_command_error(ctx, error):
     await ctx.message.delete()
 
 
-for filename in os.listdir('c:/Users/Sren/Documents/GitHub/DiscordKarmaBot/cogs'):
+for filename in os.listdir('C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot/cogs/'):
     if filename.endswith('.py'):
         bot.load_extension(f'cogs.{filename[:-3]}')
 

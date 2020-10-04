@@ -4,7 +4,7 @@
         Make installation guide to use the bot
 
     # The generel plan of action.
-        Figure out how to use the user class
+        Figure out how to use the user class (DB THING NOW)
             Perhabs just define them globally in bot I guess idk.
             Add new functionality to the user class
 
@@ -12,9 +12,6 @@
         Add default values for pomodoro timers, so every user can change their default with the !change default command.
         I think database, needs to keep track of the timer aswell, if that needs to be changed.
 
-    # BOT PART
-    Needs to add highscores for both opdutter og neddutter.
-        Maybe give roles based on these, and let them update once someone else takes the lead.
 
     # POMODORO PART
     User needs to be able to STOP the timer

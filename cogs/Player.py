@@ -8,7 +8,7 @@ class Player(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.basePath = "C:/Users/Sren/Documents/GitHub/DiscordKarmaBot/mp3-files/"
+        self.basePath = "C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot/mp3-files/"
         self.queue = asyncio.Queue()
         self.ctxList = []
         self.next = asyncio.Event()
@@ -46,7 +46,7 @@ class Player(commands.Cog):
     @commands.command(help="Shows all the current mp3 files")
     async def available(self, ctx):
         available_mp3_files = "```"
-        for filename in os.listdir('c:/Users/Sren/Documents/GitHub/DiscordKarmaBot/mp3-files'):
+        for filename in os.listdir('C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot/mp3-files'):
             if filename.endswith('.mp3'):
                 available_mp3_files += f"{filename[:-4]}\n"
         available_mp3_files += "```"

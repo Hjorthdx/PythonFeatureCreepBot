@@ -89,6 +89,5 @@ class Chess(commands.Cog):
 
         self.allSendMsgs = []
 
-
 def setup(bot):
     bot.add_cog(Chess(bot))
