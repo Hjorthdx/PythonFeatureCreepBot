@@ -1,4 +1,6 @@
-import os, discord, Db
+import os
+import discord
+import Db
 from dotenv import load_dotenv
 from discord.ext import commands
 
@@ -37,6 +39,7 @@ async def on_ready():
 @bot.event
 async def on_command_error(ctx, error):
     print(error)
+    await ctx.send(error, delete_after=15)
     await ctx.message.delete()
 
 

@@ -1,8 +1,7 @@
 import discord
 from discord.ext import commands
-import sys
-sys.path.insert(0,"C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot")
-import Db#, User #pylint: disable=import-error
+import Db
+
 
 class Karma(commands.Cog):
     # Some documentation
@@ -23,7 +22,8 @@ class Karma(commands.Cog):
     async def karma(self, ctx, *, name=None):
         print(name)
         if name is not None:
-            query = "SELECT * FROM users WHERE name=" + "'" + name + "'"
+            author_id = ctx.message.author.id
+            query = "SELECT * FROM users WHERE id=" + "'" + author_id + "'"
             print(query)
             x = await Db.myfetch(query)
             print(x)
@@ -47,6 +47,8 @@ class Karma(commands.Cog):
 
                 if int(author_id) == payload.user_id:
                     print("Self opdut :o)")
+                    # Perhabs karma cog shouldnt know about this
+                    # Should just call db method and say the amount e.g. - 2 and the author id
                     query = "UPDATE users SET opdutter = opdutter - 2 WHERE id=" + author_id
                     await Db.myfetch(query)
                 elif author_id != payload.user_id:
@@ -117,6 +119,7 @@ class Karma(commands.Cog):
             print("New roles given")
         else:
             print("Same old leader")
+
 
 def setup(bot):
     bot.add_cog(Karma(bot))

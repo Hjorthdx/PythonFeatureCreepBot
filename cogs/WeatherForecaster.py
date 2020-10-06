@@ -64,5 +64,6 @@ class WeatherForecaster(commands.Cog):
         await ctx.send(embed=embed, delete_after=30)
         await ctx.message.delete()
 
+
 def setup(bot):
     bot.add_cog(WeatherForecaster(bot))

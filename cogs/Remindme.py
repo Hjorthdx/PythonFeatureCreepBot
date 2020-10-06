@@ -1,4 +1,6 @@
-import discord, datetime
+import discord
+import datetime
+import asyncio
 from discord.ext import commands
 
 
@@ -22,11 +24,11 @@ class Remindme(commands.Cog):
         self.reminders.append(new_reminder)
         await ctx.send("I will remind you about {} in {}.".format(new_reminder.text, new_reminder.time),
                        delete_after=15)
-        await new_reminder.startReminder()
+        await ctx.message.delete()
+        await new_reminder.start_reminder()
         await ctx.send("{}, you asked me to remind you about {}, {} ago.".format(ctx.author.name, text, time),
                        delete_after=15)
         self.reminders.remove(new_reminder)
-        await ctx.message.delete()
 
     @commands.command(name="currentReminders", brief="Not implemented")
     async def current_reminders(self, ctx):
@@ -47,16 +49,15 @@ class Remindme(commands.Cog):
 def setup(bot):
     bot.add_cog(Remindme(bot))
 
-import asyncio
 
 class reminder:
     def __init__(self, time, text):
         print(time)
         self.time = time
         self.text = text
-        self.totalSeconds = self.calculateTotalSeconds()
+        self.totalSeconds = self.calculate_total_seconds()
 
-    def calculateTotalSeconds(self):
+    def calculate_total_seconds(self):
         days = 0
         hours = 0
         minutes = 0
@@ -98,5 +99,5 @@ class reminder:
         print(totalSeconds)
         return totalSeconds
 
-    async def startReminder(self):
+    async def start_reminder(self):
         await asyncio.sleep(self.totalSeconds)

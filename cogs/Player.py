@@ -1,5 +1,7 @@
 import discord
 import os
+import asyncio
+import youtube_dl
 from discord.ext import commands
 
 
@@ -9,6 +11,7 @@ class Player(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.basePath = "C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot/mp3-files/"
+        self.volume = .5
         self.queue = asyncio.Queue()
         self.ctxList = []
         self.next = asyncio.Event()
@@ -25,8 +28,9 @@ class Player(commands.Cog):
             ctx = self.ctxList.pop(0)
             async with ctx.typing():
                 x = await YTDLSource.from_url(current_song, loop=self.bot.loop, stream=True)
+                x.volume = self.volume
                 ctx.voice_client.play(x, after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
-            await ctx.send('Now playing: {}'.format(x.title), delete_after=x.duration)
+            await ctx.send('Now playing: {} at {} %'.format(x.title, self.volume * 100), delete_after=x.duration)
             await self.next.wait()
 
     # Not changed to the queue system yet. So this will likely break if tried while bot is already playing something.
@@ -41,6 +45,7 @@ class Player(commands.Cog):
     async def yt(self, ctx, *, url):
         await self.queue.put(url)
         self.ctxList.append(ctx)
+        await ctx.send(f"Url added to the queue @{ctx.message.author.display_name}", delete_after=15)
         await ctx.message.delete()
 
     @commands.command(help="Shows all the current mp3 files")
@@ -59,7 +64,8 @@ class Player(commands.Cog):
         if ctx.voice_client is None:
             return await ctx.send("Not connected to a voice channel.")
 
-        ctx.voice_client.source.volume = volume / 100
+        self.volume = volume / 100
+        ctx.voice_client.source.volume = self.volume
         await ctx.send("Changed volume to {}%".format(volume), delete_after=15)
         await ctx.message.delete()
 
@@ -96,20 +102,27 @@ class Player(commands.Cog):
         await ctx.send("Resumed", delete_after=15)
         await ctx.message.delete()
 
+    @commands.command(brief="Skips to the next audio in the queue")
+    async def skip(self, ctx):
+        ctx.voice_client.pause()
+        self.next.set()
+        await ctx.send("Skipped the current song.", delete_after=15)
+        await ctx.message.delete()
+
     @commands.command(help="Command for the Pomodoro cog to utilize", self_bot=True, hidden=True)
     async def play_pomodoro(self, ctx):
         if ctx.voice_client.is_playing():
             print("Pausing song to play pomodoro timer")
             x = ctx.voice_client.source
             ctx.voice_client.pause()
-            timer_sound = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.basePath + "Lyt nu.mp3"))
+            timer_sound = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.basePath + "Bamse.mp3"))
             ctx.voice_client.play(timer_sound, after=lambda e: print('Player error: %s' % e) if e else None)
             while ctx.voice_client.is_playing():
                 await asyncio.sleep(1)
             print("Trying to replay song")
             ctx.voice_client.play(x, after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
         else:
-            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.basePath + "Lyt nu.mp3"))
+            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(self.basePath + "Bamse.mp3"))
             ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
 
     @play.before_invoke
@@ -127,8 +140,6 @@ class Player(commands.Cog):
 def setup(bot):
     bot.add_cog(Player(bot))
 
-
-import asyncio, youtube_dl
 
 ytdl_format_options = {
     'format': 'bestaudio/best',

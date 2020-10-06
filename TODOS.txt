@@ -8,11 +8,6 @@
             Perhabs just define them globally in bot I guess idk.
             Add new functionality to the user class
 
-    # USER CLASS
-        Add default values for pomodoro timers, so every user can change their default with the !change default command.
-        I think database, needs to keep track of the timer aswell, if that needs to be changed.
-
-
     # POMODORO PART
     User needs to be able to STOP the timer
     User needs to be able to PAUSE the timer
@@ -24,13 +19,6 @@
     !p let me in
     Boomer alert
     Lofi radio
-
-    # DB
-    New database
-    postgres or w.e the thing from DBS course is telling us about. I'll try to use that for experience.
-
-Add timer per user instead of name.
-
 
 Fix pomodoro
     Needs more seperation of concern
@@ -44,6 +32,20 @@ Add remind me feature
         Check if its past the reminder
         Start countdown again if still time left
     Store a reminder in db and start a countdown.
+
+    SHOULD BE EASY ENOUGH - Just follow this three step plan
+        On ready should just request all reminders in the database.
+        If there are reminders
+            - Then it should say reminder.startReminder() to start them again.
+        Then the timers just need to be added to the database once they are created.
+    Only thing I'm not sure about is how to handle remaining time.
+        Cause then it would need to calc how much time is left just befores it ends.
+        Or else I have would to take the input as a date.
+            Perhabs that is the solution.
+            Take the input and save it as a date.
+                So the input should either be minutes, hours etc. OR a specific date
+                Either way its stored as a date
+            Then when the database loads in the reminders, then its easy to just sleep for the difference between the dates.
 
 # For the image editor thingy
     pip install Pillow
@@ -80,6 +82,14 @@ Just wild idea
             Poker, blackjack, en armet tyvknægt?, roulette.
         OMG I LOVE THE IDEA.
             Sikkert giga aids at lave fordi mit gamle kode er en smule rodet :)
+
+
+GITHUB
+    https://developer.github.com/v3/issues/
+
+ORDBOGEN COM
+    https://github.com/micvbang/ordbogen-terminal/blob/master/api.py
+
 
 # Notes to self
     # Help command

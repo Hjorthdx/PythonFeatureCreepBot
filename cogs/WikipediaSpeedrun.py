@@ -1,11 +1,9 @@
-import discord, datetime, wikipedia
+import discord
+import datetime
+import wikipedia
+import Db
 from discord.ext import commands
 
-
-# import sys
-# sys.path.insert(0,"C:/Users/Sren/Documents/GitHub/DiscordKarmaBot")
-# import Db #pylint: disable=import-error
-#sys.path.insert(0,"C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot") USE THIS INSTEAD OFC
 
 class WikipediaSpeedrun(commands.Cog):
     # Some documentation
@@ -94,6 +92,7 @@ class WikipediaSpeedrun(commands.Cog):
             await ctx.send("{}, you are not in the race!".format(ctx.message.author.display_name), delete_after=15)
         await ctx.message.delete()
 
+
 def setup(bot):
     bot.add_cog(WikipediaSpeedrun(bot))
 
@@ -130,9 +129,9 @@ class Speedrun:
             self.participants.remove(name)
             return 1
 
-    def set_goal_article(self, name, endArticle):
+    def set_goal_article(self, name, end_article):
         if name in self.participants and self.endArticle is None:
-            self.endArticle = endArticle
+            self.endArticle = end_article
             return 0
         elif self.endArticle is not None:
             return 1
