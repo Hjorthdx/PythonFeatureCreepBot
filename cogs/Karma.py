@@ -19,18 +19,17 @@ class Karma(commands.Cog):
         print("Karma cog is loaded")
 
     @commands.command(brief="i.e. .karma Hjorth")
-    async def karma(self, ctx, *, name=None):
+    async def karma(self, ctx, *, name: str or None):
         print(name)
-        if name is not None:
+        if name is None:
             author_id = ctx.message.author.id
-            query = "SELECT * FROM users WHERE id=" + "'" + author_id + "'"
+            query = f"SELECT * FROM users WHERE id={author_id}"
             print(query)
             x = await Db.myfetch(query)
             print(x)
             await ctx.send(f"{x[0][1]} has {x[0][2] - x[0][3]} total karma. {x[0][2]} opdutter and {x[0][3]} neddutter", delete_after=15)
-        elif name is None:
-            author_name = ctx.message.author.name
-            query = "SELECT * FROM users WHERE name =" + "'" + author_name +"'"
+        elif name is not None:
+            query = f"SELECT * FROM users WHERE name='{name}'"
             print(query)
             x = await Db.myfetch(query)
             print(x)

@@ -30,22 +30,31 @@ class Player(commands.Cog):
                 x = await YTDLSource.from_url(current_song, loop=self.bot.loop, stream=True)
                 x.volume = self.volume
                 ctx.voice_client.play(x, after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
-            await ctx.send('Now playing: {} at {} %'.format(x.title, self.volume * 100), delete_after=x.duration)
+            await ctx.send('Now playing: {} at {}%'.format(x.title, self.volume * 100), delete_after=x.duration)
             await self.next.wait()
 
     # Not changed to the queue system yet. So this will likely break if tried while bot is already playing something.
     @commands.command(brief="play slet dem. !available for list of all mp3's")
     async def play(self, ctx, *, user_input):
         mp3 = self.basePath + user_input + ".mp3"
-        source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(mp3))
-        ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+        if ctx.voice_client.is_playing(): # Not sure if this is expected behaviour. But now it will play over a yt stream e.g.
+            x = ctx.voice_client.source
+            ctx.voice_client.pause()
+            timer_sound = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(mp3))
+            ctx.voice_client.play(timer_sound, after=lambda e: print('Player error: %s' % e) if e else None)
+            while ctx.voice_client.is_playing():
+                await asyncio.sleep(1)
+            ctx.voice_client.play(x, after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
+        else:
+            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(mp3))
+            ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
         await ctx.message.delete()
 
     @commands.command(help="yt youtube link", aliases=['youtube'])
     async def yt(self, ctx, *, url):
         await self.queue.put(url)
         self.ctxList.append(ctx)
-        await ctx.send(f"Url added to the queue @{ctx.message.author.display_name}", delete_after=15)
+        await ctx.send(f"Url added to the queue", delete_after=15)
         await ctx.message.delete()
 
     @commands.command(help="Shows all the current mp3 files")

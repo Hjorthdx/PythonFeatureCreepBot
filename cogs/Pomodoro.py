@@ -108,7 +108,7 @@ class Pomodoro(commands.Cog):
         await ctx.send("remaining time on timer {}: {}".format(needed_timer.name, remaining_time), delete_after=15)
         await ctx.message.delete()
 
-    @commands.command(name="changeDefault", help=".changeDefault work 50 e.g.", aliases=['default', 'changedefault', 'change'])
+    @commands.command(name="changeDefault", brief=".default 25 5 e.g.", aliases=['default', 'changedefault', 'change'])
     async def change_default(self, ctx, pref_work, pref_break):
         if pref_work is None or pref_break is None:
             query = 'SELECT "prefWorkTimer", "prefBreakTimer" FROM users WHERE id={}'.format(ctx.message.author.id)

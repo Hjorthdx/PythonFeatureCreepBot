@@ -1,97 +1,105 @@
-# TODO
-    # General things
-        Tolower all user inputs, so they are not case sensitive.
-        Make installation guide to use the bot
+# Actual TODO's
+    - Database needs to have methods for each db thing. There is no reason for e.g. karma cog to know how to make a SQL
+        statement. This concern should be seperated to only be in Db.py cause its not part of karma cogs functionality.
 
-    # The generel plan of action.
-        Figure out how to use the user class (DB THING NOW)
-            Perhabs just define them globally in bot I guess idk.
-            Add new functionality to the user class
+    - Update last cogs to support the new database.
+    - This includes:
+        - Set up tables for last cogs aswell in Db.
+            - Have some value for user_id, so I can join tables.
+        - Write methods in Db for the tasks in the cog. No SQL statements within the cogs themself.
 
-    # POMODORO PART
-    User needs to be able to STOP the timer
-    User needs to be able to PAUSE the timer
-    When there is a break play the lofi radio
+    - Fix the remaining time command (POMODORO). Should give an error is negative time
+            Doesnt do that now, just tells there is -x time left on the timer.
 
-    # PLAY PART
-    !play pomodoro lyd start/slut.
-    !play farvelsangen.
-    !p let me in
-    Boomer alert
-    Lofi radio
+    FIX ALLE BRIEF COMMENTS
+        De skal fortælle kort hvad commanden gør
+        Derefter skal alle help fixes
+            De skal så gå lidt mere i dybden
+                Like fx remind me kun modtager days, hours, minutes, seconds nu. Dette skal være info for help, hvor brief bare er den reminder dig om noget.
+            OG vise alle de aliases der er for den command. MEST DEN HER SOM HAR BRUG FOR AT BLIVE GJORT
 
-Fix pomodoro
-    Needs more seperation of concern
-    Seperate everything, so that unit tests can be developed
-        Create the unit tests so we can ensure that they dont fail like they do now.
-    Fix the remaining time command. Should give an error is negative time
-        Doesnt do that now, just tells there is -x time left on the timer.
+    UNIT TESTS !!
 
-Add remind me feature
-    Checks if any current remind me's are stored. If so
-        Check if its past the reminder
-        Start countdown again if still time left
-    Store a reminder in db and start a countdown.
 
-    SHOULD BE EASY ENOUGH - Just follow this three step plan
-        On ready should just request all reminders in the database.
-        If there are reminders
-            - Then it should say reminder.startReminder() to start them again.
-        Then the timers just need to be added to the database once they are created.
-    Only thing I'm not sure about is how to handle remaining time.
-        Cause then it would need to calc how much time is left just befores it ends.
-        Or else I have would to take the input as a date.
-            Perhabs that is the solution.
-            Take the input and save it as a date.
-                So the input should either be minutes, hours etc. OR a specific date
-                Either way its stored as a date
-            Then when the database loads in the reminders, then its easy to just sleep for the difference between the dates.
+# IDEAS - Basicly backlog I suppose
+    # Random ideas / mini tasks
+        # Tolower all user inputs, so they are not case sensitive.
+        # Make installation guide to use the bot
+            Perhabs docker so its basicly plug and play? :o)
+
+
+    # Nice to have - Dont focus on this before other more import things.
+        # POMODORO
+            User needs to be able to STOP the timer
+            User needs to be able to PAUSE the timer
+            When there is a break play the lofi radio
+
+        # PLAY PART
+            .play pomodoro lyd start/slut
+            .play farvelsangen
+            .play  let me in
+            .play Boomer alert
+            Lofi radio - default site måske idk
+
+        # REMIND cog
+            Checks if any current remind me's are stored. If so
+                Check if its past the reminder
+                Start countdown again if still time left
+            Store a reminder in db and start a countdown.
+
+            SHOULD BE EASY ENOUGH - Just follow this three step plan
+                On ready should just request all reminders in the database.
+                If there are reminders
+                    - Then it should say reminder.startReminder() to start them again.
+                Then the timers just need to be added to the database once they are created.
+            Only thing I'm not sure about is how to handle remaining time.
+                Cause then it would need to calc how much time is left just befores it ends.
+                Or else I have would to take the input as a date.
+                    Perhabs that is the solution.
+                    Take the input and save it as a date.
+                        So the input should either be minutes, hours etc. OR a specific date
+                        Either way its stored as a date
+                    Then when the database loads in the reminders, then its easy to just sleep for the difference between the dates.
+
+        # WILD CASINO IDEA (Cog?)
+            Kunne være fedt hvis man fik nogle point for alle de karma man får eller bare måske noget andet også (carsten upduts? who knows)
+                Hvis det kunne blive til en form for currency, som man så kunne bruge i et nyt cog
+                Så kunne jeg lave et casino cog, hvor man kunne gamble for de points.
+                Prøv at tænk of the possibilties
+                    Poker, blackjack, en armet tyvknægt?, roulette.
+                OMG I LOVE THE IDEA.
+                    Sikkert giga aids at lave fordi mit gamle kode er en smule rodet :)
+
+
+    # COG IDEAS
+        # GITHUB cog
+            https://developer.github.com/v3/issues/
+
+        # ORDBOGEN cog - THIS IS BASICLY DICTIONARY COG JUST USE ORDBOGEN INSTEAD OF STUPID OTHER SITE
+            https://github.com/micvbang/ordbogen-terminal/blob/master/api.py
+
+        # WEATHER API cog
+            Tell the weather forecast.
+                Perhabs default x amount or specified
+
+        # Youtube cog
+            https://developers.google.com/youtube/v3/guides/push_notifications
+            Notify when new upload from specific channel
+            search and return first (or x amount) of results from youtube search
+                perhabs embed information?
+
+        # Graph cog
+            https://graph-tool.skewed.de/
+            Generate graph based on data
+                I imagine user inputs if they pillars or piechart or w.e and then gives the data
+                    The cog then returns a message with teh graph as an embed.
+
 
 # For the image editor thingy
     pip install Pillow
 
-# Youtube cog
-    https://developers.google.com/youtube/v3/guides/push_notifications
-    Notify when new upload from specific channel
-    search and return first (or x amount) of results from youtube search
-        perhabs embed information?
-
-# Graph cog
-    https://graph-tool.skewed.de/
-    Generate graph based on data
-        I imagine user inputs if they pillars or piechart or w.e and then gives the data
-            The cog then returns a message with teh graph as an embed.
-
-FIX ALLE BRIEF COMMENTS
-    De skal fortælle kort hvad commanden gør
-    Derefter skal alle help fixes
-        De skal så gå lidt mere i dybden
-            Like fx remind me kun modtager days, hours, minutes, seconds nu. Dette skal være info for help, hvor brief bare er den reminder dig om noget.
-        OG vise alle de aliases der er for den command. MEST DEN HER SOM HAR BRUG FOR AT BLIVE GJORT
-
-# WEATHER API COG
-    Tell the weather forecast.
-        Perhabs default x amount or y¨
-        ooutrewwet7´+8974q   specified
-
-Just wild idea
-    Kunne være fedt hvis man fik nogle point for alle de karma man får eller bare måske noget andet også (carsten upduts? who knows)
-        Hvis det kunne blive til en form for currency, som man så kunne bruge i et nyt cog
-        Så kunne jeg lave et casino cog, hvor man kunne gamble for de points.
-        Prøv at tænk of the possibilties
-            Poker, blackjack, en armet tyvknægt?, roulette.
-        OMG I LOVE THE IDEA.
-            Sikkert giga aids at lave fordi mit gamle kode er en smule rodet :)
-
-
-GITHUB
-    https://developer.github.com/v3/issues/
-
-ORDBOGEN COM
-    https://github.com/micvbang/ordbogen-terminal/blob/master/api.py
-
 
 # Notes to self
     # Help command
-        Thing that deletes !help is in: class _HelpCommandImpl(Command): (line 182) in the prepare method.
+        Thing that deletes .help is in: class _HelpCommandImpl(Command): (line 182) in the prepare method.
         The thing that deletes the help message itself is in: class DefaultHelpCommand(HelpCommand): (line 996) in async def send_pages(self):
