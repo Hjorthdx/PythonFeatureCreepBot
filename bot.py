@@ -4,9 +4,11 @@ import Db
 from dotenv import load_dotenv
 from discord.ext import commands
 
+
 load_dotenv()
 
-bot = commands.Bot(command_prefix='.')
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix='.', intents=intents)
 
 
 @bot.command(hidden=True)
@@ -41,7 +43,6 @@ async def on_command_error(ctx, error):
     print(error)
     await ctx.send(error, delete_after=15)
     await ctx.message.delete()
-
 
 for filename in os.listdir('C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot/cogs/'):
     if filename.endswith('.py'):

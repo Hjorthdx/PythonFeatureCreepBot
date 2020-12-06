@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import Db
 
-
+# ctx.message.guild ? Will this fix the role.members returning an empty list. Not sure. Perhabs karma class can have this guild saved as field
 class Karma(commands.Cog):
     # Some documentation
 
@@ -94,12 +94,12 @@ class Karma(commands.Cog):
         guild = self.bot.get_guild(619094316106907658)
         role = guild.get_role(762306236845916231)
         current_leader = role.members[0].id
-        print(highest_opdutted[0][0])
+        print(highest_opdutted[0][1])
         if current_leader != highest_opdutted[0][0]:
             await role.members[0].remove_roles(role, reason='No longer most opduts')
             new_leader = guild.get_member(highest_opdutted[0][0])
             await new_leader.add_roles(role, reason='Most opduttet')
-            print("New roles given")
+            print(f"New leader is {new_leader}")
         else:
             print("Same old leader")
 
