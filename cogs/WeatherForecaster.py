@@ -1,4 +1,4 @@
-import discord, requests
+import discord, requests, os
 from discord.ext import commands
 
 
@@ -28,7 +28,7 @@ class WeatherForecaster(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.apikey = "9ca0f27430d11f09efb68e4083ccc13e"
+        self.apikey = os.getenv("WEATHER_FORECASTER_API"    )
         self.baseUrl = "http://api.openweathermap.org/data/2.5/forecast?"
         # Full url example api.openweathermap.org/data/2.5/forecast?q={city name}&appid={API key}
 

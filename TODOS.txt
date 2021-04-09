@@ -94,6 +94,12 @@
                 I imagine user inputs if they pillars or piechart or w.e and then gives the data
                     The cog then returns a message with teh graph as an embed.
 
+        # Yatzy cog
+            Så vi kan spille yayzy :o)
+
+        # RIOT API COG
+            https://towardsdatascience.com/how-to-use-riot-api-with-python-b93be82dbbd6
+
 
 # For the image editor thingy
     pip install Pillow

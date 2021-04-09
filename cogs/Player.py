@@ -60,11 +60,11 @@ class Player(commands.Cog):
     @commands.command(help="Shows all the current mp3 files")
     async def available(self, ctx):
         available_mp3_files = "```"
-        for filename in os.listdir('C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot/mp3-files'):
+        for filename in os.listdir(self.basePath):
             if filename.endswith('.mp3'):
                 available_mp3_files += f"{filename[:-4]}\n"
         available_mp3_files += "```"
-        await ctx.send(available_mp3_files, delete_after=15)
+        await ctx.send(available_mp3_files, delete_after=600)
         await ctx.message.delete()
 
     @commands.command(brief="Changes the volume the bot is playing", help="I.e. !volume 60 sets the volume to 60%",

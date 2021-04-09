@@ -28,6 +28,7 @@ class Pomodoro(commands.Cog):
             x = self.bot.get_channel(619094316106907660)
             await x.send("Pomodoro?", delete_after=300)
 
+    # Timer skal komme ind som en parameter så ejg kan dependency inject den og så kan der unit testes !
     @commands.command(brief="Default value 50/10", help=".pomodoro x y, where x is work length and y is break length.", aliases=['p'])
     async def pomodoro(self, ctx):
         play_cmd = self.bot.get_command("play_pomodoro")
@@ -40,6 +41,7 @@ class Pomodoro(commands.Cog):
         await new_timer.work_timer()
         await ctx.send("Works over! Break starts now", delete_after=break_length)
         # Ensures voice. This is a "hack".
+        # Lav da det der get_command med ensure voice.
         if ctx.voice_client is None:
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()
@@ -77,6 +79,7 @@ class Pomodoro(commands.Cog):
             print("Something went wrong.")
 
     # Idk something needs to be done with this formatting. Its not doing it right xd
+    # strftime eller sådan noget
     @staticmethod
     def format_time(work_length, break_length, new_timer):
         x = new_timer.startingTime + datetime.timedelta(seconds=work_length)

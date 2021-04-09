@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import Db
 
-# ctx.message.guild ? Will this fix the role.members returning an empty list. Not sure. Perhabs karma class can have this guild saved as field
+
 class Karma(commands.Cog):
     # Some documentation
 
@@ -20,6 +20,7 @@ class Karma(commands.Cog):
 
     @commands.command(brief="i.e. .karma Hjorth")
     async def karma(self, ctx, *, name: str or None):
+        print(ctx.message.content)
         print(name)
         if name is None:
             author_id = ctx.message.author.id
@@ -34,7 +35,19 @@ class Karma(commands.Cog):
             x = await Db.myfetch(query)
             print(x)
             await ctx.send(f"{x[0][1]} has {x[0][2] - x[0][3]} total karma. {x[0][2]} opdutter and {x[0][3]} neddutter", delete_after=15)
-        await ctx.message.delete()
+        #await ctx.message.delete()
+
+    @commands.command(brief="Returns all karma data from the database")
+    async def leaderboard(self, ctx):
+        x = await Db.myfetch("SELECT id, name, opdutter, neddutter FROM users ORDER BY opdutter DESC LIMIT 6;")
+        #msg = "Name:    Opdutter:   Neddutter:\n"
+        embed = discord.Embed(title="The karma standings! :o)")
+        for i in range(len(x)):
+            embed.add_field(name=f'**{x[i][1]}**', value=f'> Total: {x[i][2] - x[i][3]}\n > Opdutter: {x[i][2]}\n > Neddutter: {x[i][3]}\n')
+        await ctx.send(embed=embed, delete_after=300)
+        #await ctx.message.delete()
+
+
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
@@ -51,6 +64,7 @@ class Karma(commands.Cog):
                     query = "UPDATE users SET opdutter = opdutter - 2 WHERE id=" + author_id
                     await Db.myfetch(query)
                 elif author_id != payload.user_id:
+                    print(f"Opdut added to {author_id}")
                     query = "UPDATE users SET opdutter = opdutter + 1 WHERE id=" + author_id
                     await Db.myfetch(query)
                 await self.update_highest_opdut()
@@ -59,6 +73,7 @@ class Karma(commands.Cog):
                 message = await self.bot.http.get_message(payload.channel_id, payload.message_id)  # Dictionary
                 authorDict = message["author"]
                 author_id = authorDict["id"]  # String
+                print(f"Neddut added to {author_id}")
                 query = "UPDATE users SET opdutter = neddutter + 1 WHERE id=" + author_id
                 await Db.myfetch(query)
                 await self.update_highest_neddut()
@@ -75,6 +90,7 @@ class Karma(commands.Cog):
                     query = "UPDATE users SET opdutter = opdutter + 2 WHERE id=" + author_id
                     await Db.myfetch(query)
                 elif author_id != payload.user_id:
+                    print(f"Opdut removed from {author_id}")
                     query = "UPDATE users SET opdutter = opdutter - 1 WHERE id=" + author_id
                     await Db.myfetch(query)
                 await self.update_highest_opdut()
@@ -83,6 +99,7 @@ class Karma(commands.Cog):
                 message = await self.bot.http.get_message(payload.channel_id, payload.message_id)  # Dictionary
                 authorDict = message["author"]
                 author_id = authorDict["id"]  # String
+                print(f"Neddut removed from {author_id}")
                 query = "UPDATE users SET opdutter = neddutter - 1 WHERE id=" + author_id
                 await Db.myfetch(query)
                 await self.update_highest_neddut()
@@ -90,11 +107,10 @@ class Karma(commands.Cog):
     async def update_highest_opdut(self):
         highest_opdutted = await Db.myfetch(
             "SELECT id, name, opdutter FROM users ORDER BY opdutter DESC LIMIT 1;")
-        print(highest_opdutted)
         guild = self.bot.get_guild(619094316106907658)
         role = guild.get_role(762306236845916231)
         current_leader = role.members[0].id
-        print(highest_opdutted[0][1])
+        print(f"Most opduts in db: {highest_opdutted[0][1]}")
         if current_leader != highest_opdutted[0][0]:
             await role.members[0].remove_roles(role, reason='No longer most opduts')
             new_leader = guild.get_member(highest_opdutted[0][0])
