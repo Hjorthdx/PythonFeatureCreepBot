@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-from sqlalchemy import create_engine, update, func, desc, asc
+from sqlalchemy import create_engine, update, func, desc, asc, select
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -13,16 +13,6 @@ engine = create_engine(os.getenv("TEST_CONNECT"), pool_pre_ping=True, echo=True)
 Base.metadata.create_all(bind=engine)
 Session = sessionmaker(bind=engine)
 session = Session()
-
-
-def add_user(user):
-    session.add(user)
-    session.commit()
-
-# Needs work
-def update_user(user):
-    session.query(User).filter(User.id != user.id - 1).update({User.name: ":D." + User.name}, synchronize_session=False)
-    session.commit()
 
 
 def get_user_by_id(_id):
@@ -50,8 +40,11 @@ def update_user_down_votes(_id, amount):
 
 
 def get_highest_up_votes():
-    return session.query(User).select(User.name, User.up_votes, User.down_votes).order_by(func.max(User.up_votes)).first()
-    #return session.query(func.max(User.up_votes)).scalar()
+    return session.query(User).order_by(User.up_votes.desc()).first()
+
+
+def get_highest_down_votes():
+    return session.query(User).order_by(User.up_votes.desc()).first()
 
 
 

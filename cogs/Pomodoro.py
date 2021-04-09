@@ -10,6 +10,7 @@ class Pomodoro(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.configuration = bot.get_cog("Configuration")
         self.current_timers = []
         self.in_room_counter = 0
 
@@ -26,12 +27,17 @@ class Pomodoro(commands.Cog):
         
         if self.in_room_counter >= 2 and not self.current_timers:
             x = self.bot.get_channel(619094316106907660)
-            await x.send("Pomodoro?", delete_after=300)
+            await x.send("Pomodoro?", delete_after=self.configuration.very_long_delete_after_time)
 
     # Timer skal komme ind som en parameter så ejg kan dependency inject den og så kan der unit testes !
-    @commands.command(brief="Default value 50/10", help=".pomodoro x y, where x is work length and y is break length.", aliases=['p'])
+    # Der skal ske mange ting. Honestly meget skal nok bare laves op fra starten :D
+    # Brug det der jeg lige har sat ind med player.cog.play i stedet for get command. Så slipper jeg for den ekstra command for no reason.
+    @commands.command(brief="Default value 50/10",
+                      help=".pomodoro x y, where x is work length and y is break length.",
+                      aliases=['po'])
     async def pomodoro(self, ctx):
         play_cmd = self.bot.get_command("play_pomodoro")
+        player_cog = self.bot.get_cog("Player")
         work_length, break_length = await self.get_lengths_from_message(ctx.message)
         new_timer = Timer(ctx.message.author.id, work_length, break_length)
         work_end_time, break_end_time = self.format_time(work_length, break_length, new_timer)
@@ -45,7 +51,7 @@ class Pomodoro(commands.Cog):
         if ctx.voice_client is None:
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()
-        await ctx.invoke(play_cmd)
+        await player_cog.play(ctx=ctx, user_input="bamse")
 
         await new_timer.break_timer()
         await ctx.send("Breaks over!", delete_after=15)
@@ -54,7 +60,7 @@ class Pomodoro(commands.Cog):
         if ctx.voice_client is None:
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()
-        await ctx.invoke(play_cmd)
+        await player_cog.play(ctx=ctx, user_input="bamse")
 
         query = 'INSERT INTO pomodoros ("startingTime", "workLength", "breakLength", author) VALUES ({}, {}, {}, {})'.format(new_timer.startingDate, new_timer.workLength, new_timer.breakLength, new_timer.author_id)
         await Db.myfetch(query)

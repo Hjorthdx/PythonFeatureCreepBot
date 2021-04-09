@@ -97,7 +97,7 @@ class DictionaryCog(commands.Cog):
                 content="Current guessed words:\n {} {} {}".format(self.guessed_words_before, self.your_word,
                                                                    self.guessed_words_after))
 
-    @commands.command(brief="Prints out the alphabet for your convenience", aliases=['abc', 'alph'])
+    @commands.command(brief="Prints out the alphabet for you", aliases=['abc', 'alph'])
     async def alphabet(self, ctx):
         await ctx.send("A B C D E F G H I J K L M N O P Q R S T U V W X Y Z", delete_after=self.configuration.very_long_delete_after_time)
 
