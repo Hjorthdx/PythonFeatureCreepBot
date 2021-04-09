@@ -1,3 +1,62 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+from sqlalchemy import create_engine, update, func, desc, asc
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+
+Base = declarative_base()
+from models import *
+
+engine = create_engine(os.getenv("TEST_CONNECT"), pool_pre_ping=True, echo=True)
+Base.metadata.create_all(bind=engine)
+Session = sessionmaker(bind=engine)
+session = Session()
+
+
+def add_user(user):
+    session.add(user)
+    session.commit()
+
+# Needs work
+def update_user(user):
+    session.query(User).filter(User.id != user.id - 1).update({User.name: ":D." + User.name}, synchronize_session=False)
+    session.commit()
+
+
+def get_user_by_id(_id):
+    return session.query(User).filter_by(id=_id).first()
+
+
+def get_user_by_name(name):
+    return session.query(User).filter_by(name=name).first()
+
+
+def get_amount_of_users(amount):
+    return session.query(User)[0:amount]
+
+
+def update_user_up_votes(_id, amount):
+    session.query(User).filter(User.id == _id).update({User.up_votes: User.up_votes + amount},
+                                                      synchronize_session=False)
+    session.commit()
+
+
+def update_user_down_votes(_id, amount):
+    session.query(User).filter(User.id == _id).update({User.down_votes: User.down_votes + amount},
+                                                      synchronize_session=False)
+    session.commit()
+
+
+def get_highest_up_votes():
+    return session.query(User).select(User.name, User.up_votes, User.down_votes).order_by(func.max(User.up_votes)).first()
+    #return session.query(func.max(User.up_votes)).scalar()
+
+
+
+
+# OLD UNDER
 import asyncio
 import os
 

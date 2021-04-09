@@ -7,7 +7,6 @@ import nltk
 # from random import sample
 import random
 import re
-from Constants import *
 
 
 # Remove none used imports
@@ -20,6 +19,7 @@ class DictionaryCog(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.configuration = bot.get_cog("Configuration")
         # Hard words list
         # self.wordsList = words.words()
         # self.randomWord = ''.join(sample(self.wordsList, 1))
@@ -40,44 +40,52 @@ class DictionaryCog(commands.Cog):
 
     @commands.command(help="Just a stupid little game", aliases=['g'])
     async def guess(self, ctx, *, user_guess: str):
-        your_word = "Your word"
         print("Random word is: {}".format(self.random_word))
-        result = self._guess(user_guess)
-        if result == 0:
-            await ctx.send(f"The word: {user_guess} has already been guessed!", delete_after=CONSTANT_SHORT_DELETE_AFTER_TIME)
-        elif result == 1:
+        if self._is_guessed_before(user_guess):
+            await ctx.send(f"The word: {user_guess} has already been guessed!",
+                           delete_after=self.configuration.short_delete_after_time)
+        elif not self._is_in_word_list(user_guess):
+            await ctx.send("{} is not in the words list!".format(user_guess),
+                           delete_after=self.configuration.short_delete_after_time)
+        elif self._is_correct(user_guess):
             await ctx.send(
-                "The word was indeed {}! Congratz {} you got it".format(self.random_word, ctx.author.name),
-                delete_after=CONSTANT_SHORT_DELETE_AFTER_TIME)
+                "The word was indeed {}! Congratz {} you got it!".format(self.random_word, ctx.author.name),
+                delete_after=self.configuration.short_delete_after_time)
             await self._reset()
-        elif result == 2:
-            await ctx.send("The word is before {}".format(user_guess), delete_after=CONSTANT_SHORT_DELETE_AFTER_TIME)
+        elif self._is_before_correct_word(user_guess):
+            await ctx.send("The word is before {}".format(user_guess), delete_after=self.configuration.short_delete_after_time)
             await self._update_guessed_words_message(ctx)
-        elif result == 3:
-            await ctx.send("The word is after {}".format(user_guess), delete_after=CONSTANT_SHORT_DELETE_AFTER_TIME)
+        elif self._is_after_correct_word(user_guess):
+            await ctx.send("The word is after {}".format(user_guess), delete_after=self.configuration.short_delete_after_time)
             await self._update_guessed_words_message(ctx)
-        elif result == 4:
-            await ctx.send("{} is not in the words list!".format(user_guess), delete_after=CONSTANT_SHORT_DELETE_AFTER_TIME)
 
-    def _guess(self, user_guess: str):
-        print("Random word is: {}".format(self.random_word))  # Just for debugging
+    def _is_guessed_before(self, user_guess):
         if user_guess in self.guessed_words_before or user_guess in self.guessed_words_after:
-            return 0
+            return True
+
+    def _is_correct(self, user_guess):
+        if user_guess == self.random_word:
+            return True
+
+    def _is_in_word_list(self, user_guess):
         if re.search(r'\b{}\b'.format(user_guess), self.words_list):
-            if user_guess == self.random_word:
-                return 1  # We have guessed the word correctly.
-            x = [self.random_word, user_guess]
-            x.sort()
-            if x[0] == self.random_word:
-                self.guessed_words_after.append(user_guess)
-                self.guessed_words_after.sort()
-                return 2  # Guess before the random word.
-            if x[1] == self.random_word:
-                self.guessed_words_before.append(user_guess)
-                self.guessed_words_before.sort()
-                return 3  # Guess after the random word.
-        else:
-            return 4  # Word not in word list.
+            return True
+
+    def _is_before_correct_word(self, user_guess):
+        temp_list = [self.random_word, user_guess]
+        temp_list.sort()
+        if temp_list[0] == self.random_word:
+            self.guessed_words_after.append(user_guess)
+            self.guessed_words_after.sort()
+            return True
+
+    def _is_after_correct_word(self, user_guess):
+        temp_list = [self.random_word, user_guess]
+        temp_list.sort()
+        if temp_list[1] == self.random_word:
+            self.guessed_words_before.append(user_guess)
+            self.guessed_words_before.sort()
+            return True
 
     async def _update_guessed_words_message(self, ctx):
         if self.guessed_words_msg is None:
@@ -91,13 +99,13 @@ class DictionaryCog(commands.Cog):
 
     @commands.command(brief="Prints out the alphabet for your convenience", aliases=['abc', 'alph'])
     async def alphabet(self, ctx):
-        await ctx.send("A B C D E F G H I J K L M N O P Q R S T U V W X Y Z", delete_after=CONSTANT_VERY_LONG_DELETE_AFTER_TIME)
+        await ctx.send("A B C D E F G H I J K L M N O P Q R S T U V W X Y Z", delete_after=self.configuration.very_long_delete_after_time)
 
     @commands.command(name="giveup", brief="Resets and generates a new word.")
     async def give_up(self, ctx):
-        await ctx.send("The word was: {}".format(self.random_word), delete_after=CONSTANT_SHORT_DELETE_AFTER_TIME)
+        await ctx.send("The word was: {}".format(self.random_word), delete_after=self.configuration.short_delete_after_time)
         await self._reset()
-        await ctx.send("A new random word has been generated. Good luck.", delete_after=CONSTANT_SHORT_DELETE_AFTER_TIME)
+        await ctx.send("A new random word has been generated. Good luck.", delete_after=self.configuration.short_delete_after_time)
 
     async def _reset(self):
         self.random_word = random.choice(list(open(self.easy_words_wist_path))).rstrip("\n")
@@ -108,7 +116,7 @@ class DictionaryCog(commands.Cog):
                       aliases=['synonym'])
     async def synonyms(self, ctx, *, word):
         synonyms_for_word = self._synonyms(word)
-        await ctx.send("Synonyms for: {}\n{}".format(word, synonyms_for_word), delete_after=CONSTANT_LONG_DELETE_AFTER_TIME)
+        await ctx.send("Synonyms for: {}\n{}".format(word, synonyms_for_word), delete_after=self.configuration.long_delete_after_time)
 
     @staticmethod
     def _synonyms(word):
@@ -127,7 +135,7 @@ class DictionaryCog(commands.Cog):
                       aliases=['antonym'])
     async def antonyms(self, ctx, *, word):
         antonyms_for_word = self._antonyms(word)
-        await ctx.send("Antonyms for: {}\n{}".format(word, antonyms_for_word), delete_after=CONSTANT_LONG_DELETE_AFTER_TIME)
+        await ctx.send("Antonyms for: {}\n{}".format(word, antonyms_for_word), delete_after=self.configuration.long_delete_after_time)
 
     @staticmethod
     def _antonyms(word):
@@ -147,10 +155,10 @@ class DictionaryCog(commands.Cog):
     async def definition(self, ctx, *, word):
         syns = wordnet.synsets(word)
         try:
-            await ctx.send("Definition of {} is:\n{}".format(word, syns[0].definition()), delete_after=CONSTANT_SHORT_DELETE_AFTER_TIME)
+            await ctx.send("Definition of {} is:\n{}".format(word, syns[0].definition()), delete_after=self.configuration.short_delete_after_time)
         except IndexError:
             print(f"Got the error here with the word {word}.") #  Not sure if this is me making the error or what it is.
-            await ctx.send("Index out of range error", delete_after=CONSTANT_SHORT_DELETE_AFTER_TIME)
+            await ctx.send("Index out of range error", delete_after=self.configuration.short_delete_after_time)
 
 
 def setup(bot):

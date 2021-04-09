@@ -1,11 +1,10 @@
 import os
 import discord
-import Db
 from dotenv import load_dotenv
 from discord.ext import commands
 
-
 load_dotenv()
+
 
 intents = discord.Intents.all()
 bot = commands.Bot(command_prefix='.', intents=intents)
@@ -15,14 +14,12 @@ bot = commands.Bot(command_prefix='.', intents=intents)
 async def load(ctx, extension):
     if ctx.author.id == 140195461519769601:
         bot.load_extension(f'cogs.{extension}')
-        await ctx.message.delete()
 
 
 @bot.command(hidden=True)
 async def unload(ctx, extension):
     if ctx.author.id == 140195461519769601:
         bot.unload_extension(f'cogs.{extension}')
-        await ctx.message.delete()
 
 
 @bot.command(hidden=True)
@@ -30,7 +27,6 @@ async def reload(ctx, extension):
     if ctx.author.id == 140195461519769601:
         bot.unload_extension(f'cogs.{extension}')
         bot.load_extension(f'cogs.{extension}')
-        await ctx.message.delete()
 
 
 @bot.event
@@ -55,6 +51,7 @@ async def on_command_error(ctx, error):
     await ctx.send(error, delete_after=15)
     await ctx.message.delete()
 
+
 # Has two functionalities right now. This should be fixed and moved into two different methods xd
 async def recount_karma():
     channel = bot.get_channel(619105859615719434)
@@ -77,6 +74,7 @@ async def recount_karma():
     total = opduts - nedduts
     return total, opduts, nedduts
 
+
 async def get_all_memes_from_migmig_channel_that_has_remouladeklat_or_opdut():
     channel = bot.get_channel(619105859615719434)
     messages = await channel.history(limit=None).flatten()
@@ -93,6 +91,7 @@ async def get_all_memes_from_migmig_channel_that_has_remouladeklat_or_opdut():
                     except AttributeError as e:
                         print(f'{e}, message author: {message.author.display_name}')
 
+
 async def get_everything_from_migmig_channel():
     channel = bot.get_channel(619105859615719434)
     messages = await channel.history(limit=None).flatten()
@@ -103,9 +102,6 @@ async def get_everything_from_migmig_channel():
                 if attachment.filename.endswith('.png') or attachment.filename.endswith('.jpg') or attachment.filename.endswith('.mp3') or attachment.filename.endswith('.mp4'):
                     print(f'id: {message.author.display_name}, filename: {attachment.filename}')
                     await attachment.save(str(message.author.display_name) + str(attachment.id) + attachment.filename)
-
-
-
 
 
 for filename in os.listdir('C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot/cogs/'):
