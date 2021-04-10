@@ -13,10 +13,14 @@ class Player(commands.Cog):
         self.configuration = bot.get_cog("Configuration")
         self.base_path = "C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot/mp3-files/"
         self.volume = .5
-        self.queue = asyncio.Queue()
+        self.queue = asyncio.PriorityQueue()
         self.context_list = []
         self.next = asyncio.Event()
         self.bot.loop.create_task(self.audio_player_task())
+
+        # Magic values right now. Should be set to something else. Just this for now while testing.
+        self.play_priority = 20
+        self.yt_priority = 0
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -26,13 +30,17 @@ class Player(commands.Cog):
         while True:
             self.next.clear()
             current_song = await self.queue.get()
+            current_song = current_song[2]
             ctx = self.context_list.pop(0)
             async with ctx.typing():
-                audio_source = await YTDLSource.from_url(current_song, loop=self.bot.loop, stream=True)
-                audio_source.volume = self.volume
-                ctx.voice_client.play(audio_source, after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
-            await ctx.send('Now playing: {} at {}%'.format(audio_source.title, self.volume * 100),
-                           delete_after=audio_source.duration)
+                if isinstance(current_song, discord.PCMVolumeTransformer):
+                    ctx.voice_client.play(current_song, after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
+                else:
+                    audio_source = await YTDLSource.from_url(current_song, loop=self.bot.loop, stream=True)
+                    audio_source.volume = self.volume
+                    ctx.voice_client.play(audio_source, after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
+                    await ctx.send(f'Now playing: {audio_source.title} at {self.volume * 100}%',
+                           delete_after=audio_source.duration)  # Only writes for yt. Does not write anything for .play
             await self.next.wait()
 
     @commands.command(brief="play slet dem. !available for list of all mp3's")
@@ -41,20 +49,30 @@ class Player(commands.Cog):
         if ctx.voice_client.is_playing():
             current_audio_source = ctx.voice_client.source
             ctx.voice_client.pause()
-            timer_sound = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(mp3_path))
-            ctx.voice_client.play(timer_sound, after=lambda e: print('Player error: %s' % e) if e else None)
-            while ctx.voice_client.is_playing():
-                await asyncio.sleep(1)
-            ctx.voice_client.play(current_audio_source, after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
+            await self._add_to_queue(ctx, source=current_audio_source)
+            source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(mp3_path))
+            await self._add_to_queue(ctx, source=source)
+            self.next.set()
         else:
             source = discord.PCMVolumeTransformer(discord.FFmpegPCMAudio(mp3_path))
-            ctx.voice_client.play(source, after=lambda e: print('Player error: %s' % e) if e else None)
+            await self._add_to_queue(ctx, source=source)
+            self.next.set()
 
     @commands.command(help="yt youtube link", aliases=['youtube'])
     async def yt(self, ctx, *, url):
-        await self.queue.put(url)
-        self.context_list.append(ctx)
+        await self._add_to_queue(ctx, url=url)
         await ctx.send(f"Url added to the queue", delete_after=self.configuration.short_delete_after_time)
+
+    async def _add_to_queue(self, ctx, url=None, source=None):
+        if url is not None:
+            await self.queue.put((self.yt_priority, url))
+            self.yt_priority += 1
+            self.context_list.append(ctx)
+        else:
+            await self.queue.put((self.play_priority, source))
+            self.play_priority -= 1
+            self.context_list.append(ctx)
+
 
     @commands.command(help="Shows all the current mp3 files")
     async def available(self, ctx):
@@ -129,9 +147,12 @@ class Player(commands.Cog):
 
     @commands.command(brief="Skips to the next audio in the queue")
     async def skip(self, ctx):
-        ctx.voice_client.pause()
-        self.next.set()
-        await ctx.send("Skipped the current song.", delete_after=self.configuration.short_delete_after_time)
+        if self.queue:
+            ctx.voice_client.pause()
+            self.next.set()
+            await ctx.send("Skipped the current song.", delete_after=self.configuration.short_delete_after_time)
+        else:
+            ctx.send("Queue is empty", delete_after=self.configuration.short_delete_after_time)
 
     @play.before_invoke
     @yt.before_invoke
@@ -143,10 +164,8 @@ class Player(commands.Cog):
                 await ctx.send("You are not connected to a voice channel.")
                 raise commands.CommandError("Author not connected to a voice channel.")
 
-    @play.before_invoke
-    @yt.before_invoke
     async def leave_voice(self, ctx):
-        if not self.queue.empty():
+        if self.queue:
             # Sleeping while still playing audio.
             await asyncio.sleep(1)
         await ctx.voice_client.disconnect()
