@@ -1,7 +1,6 @@
 import discord
 import datetime
 import wikipedia
-import Db
 from discord.ext import commands
 
 

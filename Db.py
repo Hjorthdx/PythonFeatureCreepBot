@@ -9,7 +9,7 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 from models import *
 
-engine = create_engine(os.getenv("TEST_CONNECT"), pool_pre_ping=True, echo=True)
+engine = create_engine(os.getenv("DB_CONNECTION_STRING"), pool_pre_ping=True, echo=True)
 Base.metadata.create_all(bind=engine)
 Session = sessionmaker(bind=engine)
 session = Session()
@@ -46,28 +46,6 @@ def get_highest_up_votes():
 def get_highest_down_votes():
     return session.query(User).order_by(User.up_votes.desc()).first()
 
-
-
-
-# OLD UNDER
-import asyncio
-import os
-
-import asyncpg
-
-
-async def myfetch(query):
-    conn = await asyncpg.connect(user='postgres', password='MD80N2N!fuHz', database='DiscordData', host='127.0.0.1')
-    values = await conn.fetch(query)
-    await conn.close()
-    return values
-
-
-# Perhabs ? I'm not sure what is best. Both seem, I mean not so safe. Sql injection xd
-async def add_opdut(query):
-    sql_query = "UPDATE users SET opdutter = opdutter + 1 WHERE id=" + query
-    pgpass = os.getenv("PG_PASSWORD")
-    conn = await asyncpg.connect(user='postgres', password=pgpass, database='DiscordData', host='127.0.0.1')
-    res = await conn.fetch(sql_query)
-    await conn.close()
-    return res
+def add_pomodoro_to_db(work_length, break_length, author_id, starting_time):
+    session.add(Pomodoro(work_length=work_length, break_length=break_length, author=author_id, starting_time=starting_time))
+    session.commit()

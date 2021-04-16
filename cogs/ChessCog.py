@@ -6,7 +6,7 @@ from cairosvg import svg2png
 import random
 
 
-class Chess(commands.Cog):
+class ChessCog(commands.Cog, name="Chess"):
     # Some documentation
 
     def __init__(self, bot):
@@ -94,4 +94,4 @@ class Chess(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(Chess(bot))
+    bot.add_cog(ChessCog(bot))

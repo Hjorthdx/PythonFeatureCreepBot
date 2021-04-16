@@ -49,7 +49,6 @@ async def on_command_completion(ctx):
 async def on_command_error(ctx, error):
     print(error)
     await ctx.send(error, delete_after=15)
-    await ctx.message.delete()
 
 
 # Has two functionalities right now. This should be fixed and moved into two different methods xd

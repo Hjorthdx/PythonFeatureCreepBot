@@ -14,6 +14,9 @@ class User(Db.Base):
     def __repr__(self):
         return f"<User(id={self.id}, name={self.name}, opdutter={self.up_votes}, neddutter={self.down_votes}, work/break timer={self.preferred_work_timer}/{self.preferred_break_timer}>\n"
 
+    def __eq__(self, other):
+        return isinstance(other, User) and other.id == self.id
+
 
 class Pomodoro(Db.Base):
     __tablename__ = 'pomodoros'

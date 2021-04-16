@@ -1,6 +1,7 @@
+'''
 import unittest
 import sys
-sys.path.insert(0,"C:C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot/Cogs")
+sys.path.insert(0, "C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot/Cogs")
 import Remindme #pylint: disable=import-error
 
 class TestReminder(unittest.TestCase):
@@ -12,3 +13,5 @@ class TestReminder(unittest.TestCase):
     # Needs tests for:
     #   negative numbers
     #   Not all paramaters
+
+'''

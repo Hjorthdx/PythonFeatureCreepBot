@@ -15,8 +15,10 @@ class Player(commands.Cog):
         self.volume = .5
         self.queue = asyncio.PriorityQueue()
         self.context_list = []
+        self.current_context = None
         self.next = asyncio.Event()
         self.bot.loop.create_task(self.audio_player_task())
+        self.bot.loop.create_task(self.ensure_left_voice())
 
         # Magic values right now. Should be set to something else. Just this for now while testing.
         self.play_priority = 20
@@ -30,8 +32,9 @@ class Player(commands.Cog):
         while True:
             self.next.clear()
             current_song = await self.queue.get()
-            current_song = current_song[2]
+            current_song = current_song[1]
             ctx = self.context_list.pop(0)
+            self.current_context = ctx
             async with ctx.typing():
                 if isinstance(current_song, discord.PCMVolumeTransformer):
                     ctx.voice_client.play(current_song, after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
@@ -42,6 +45,31 @@ class Player(commands.Cog):
                     await ctx.send(f'Now playing: {audio_source.title} at {self.volume * 100}%',
                            delete_after=audio_source.duration)  # Only writes for yt. Does not write anything for .play
             await self.next.wait()
+
+    # Der er noget her med at current_context er jo None i starten
+    # Men når den har spillet en gang, så er den ikke null mere, men derimod
+    # Så er .voice_client None fordi den er jo blevet disconnectet, men
+    # current_context er ikke None mere og så får vi en fejl.
+
+    # Måske noget med listeners? Så kunnne jeg lave en funktion som venter på at der sker et eller andet
+    # og så når det sker, så kan jeg få den til at vente på at disconnect?
+    # Idk det er sent.
+    async def ensure_left_voice(self):
+        while True:
+            print("Start")
+            if self.current_context is None:
+                print("ctx is none")
+                await asyncio.sleep(15)
+                continue
+            try:
+                if self.queue.empty() and not self.current_context.voice_client.is_playing():
+                    print("q empty not playing")
+                    await self.current_context.voice_client.disconnect()
+                await asyncio.sleep(15)
+            except:
+                print("current_context.voice_client NoneType object")
+                await asyncio.sleep(15)
+                continue
 
     @commands.command(brief="play slet dem. !available for list of all mp3's")
     async def play(self, ctx, *, user_input):
@@ -72,7 +100,6 @@ class Player(commands.Cog):
             await self.queue.put((self.play_priority, source))
             self.play_priority -= 1
             self.context_list.append(ctx)
-
 
     @commands.command(help="Shows all the current mp3 files")
     async def available(self, ctx):
@@ -163,12 +190,6 @@ class Player(commands.Cog):
             else:
                 await ctx.send("You are not connected to a voice channel.")
                 raise commands.CommandError("Author not connected to a voice channel.")
-
-    async def leave_voice(self, ctx):
-        if self.queue:
-            # Sleeping while still playing audio.
-            await asyncio.sleep(1)
-        await ctx.voice_client.disconnect()
 
 
 def setup(bot):

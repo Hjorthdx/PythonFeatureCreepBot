@@ -4,20 +4,24 @@ import asyncio
 from discord.ext import commands
 import Db
 
+CONSTANT_SECONDS_IN_AN_HOUR = 3600
+CONSTANT_SECONDS_IN_A_MINUTE = 60
 
-class Pomodoro(commands.Cog):
+
+class PomodoroCog(commands.Cog, name="Pomodoro"):
     # Some documentation
 
     def __init__(self, bot):
         self.bot = bot
         self.configuration = bot.get_cog("Configuration")
-        self.current_timers = []
+        self.pomodoro_manager = PomodoroManager()
         self.in_room_counter = 0
 
     @commands.Cog.listener()
     async def on_ready(self):
         print("Pomodoro cog is loaded")
 
+    # Not refactored yet
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         if after.channel is None:
@@ -29,83 +33,120 @@ class Pomodoro(commands.Cog):
             x = self.bot.get_channel(619094316106907660)
             await x.send("Pomodoro?", delete_after=self.configuration.very_long_delete_after_time)
 
-    # Timer skal komme ind som en parameter så ejg kan dependency inject den og så kan der unit testes !
-    # Der skal ske mange ting. Honestly meget skal nok bare laves op fra starten :D
-    # Brug det der jeg lige har sat ind med player.cog.play i stedet for get command. Så slipper jeg for den ekstra command for no reason.
-    @commands.command(brief="Default value 50/10",
-                      help=".pomodoro x y, where x is work length and y is break length.",
-                      aliases=['po'])
-    async def pomodoro(self, ctx):
-        play_cmd = self.bot.get_command("play_pomodoro")
+    # Læs indtil der ikke er mere. Sidste parameter kun. Prøv at læs doc
+    @commands.command()
+    async def pomodoro(self, ctx, work_length=None, break_length=None, name=None):
+        await ctx.invoke(self.bot.get_command('play'), user_input="bamse")
         player_cog = self.bot.get_cog("Player")
-        work_length, break_length = await self.get_lengths_from_message(ctx.message)
-        new_timer = Timer(ctx.message.author.id, work_length, break_length)
-        work_end_time, break_end_time = self.format_time(work_length, break_length, new_timer)
-        await ctx.send("Starting timers: {} / {} minutes. \nWork ends at {} \nBreak ends at {}".format(work_length / 60, break_length / 60, work_end_time, break_end_time), delete_after=new_timer.workLength + new_timer.breakLength)
-        self.current_timers.append(new_timer)
+        if work_length is None or break_length is None:
+            work_length, break_length = self._get_work_break_length(ctx.message.author.id)
 
-        await new_timer.work_timer()
-        await ctx.send("Works over! Break starts now", delete_after=break_length)
-        # Ensures voice. This is a "hack".
-        # Lav da det der get_command med ensure voice.
-        if ctx.voice_client is None:
-            if ctx.author.voice:
-                await ctx.author.voice.channel.connect()
+        work_duration = datetime.timedelta(minutes=int(work_length))
+        break_duration = datetime.timedelta(minutes=int(break_length))
+
+        new_pomodoro = self.pomodoro_manager.start_new_pomodoro(ctx.message.channel.category_id, work_duration, break_duration, name)
+
+        await ctx.send(f"Starting pomodoro with timers: "
+                       f"{self._to_minutes(new_pomodoro.work_timer.duration)} / {self._to_minutes(new_pomodoro.break_timer.duration)}!\n"
+                       f"Work ends at: {new_pomodoro.get_end_work_time()}\n"
+                       f"Break ends at: {new_pomodoro.get_end_break_time()}\n",
+                       delete_after=new_pomodoro.total_time.total_seconds())
+        await new_pomodoro.work_timer.start()
+        #await player_cog.ensure_voice(ctx=ctx)
+        await ctx.invoke(self.bot.get_command('play'), user_input="bamse")
+
+        await ctx.send(f"Work is over!\n"
+                       f"Kick back, relax, and grab yourself a beverage!\n"
+                       f"Break ends at {new_pomodoro.get_end_break_time()}",
+                       delete_after=self.configuration.long_delete_after_time)
+        await new_pomodoro.break_timer.start()
         await player_cog.play(ctx=ctx, user_input="bamse")
-
-        await new_timer.break_timer()
-        await ctx.send("Breaks over!", delete_after=15)
-
-        # Ensures voice. This is a "hack".
-        if ctx.voice_client is None:
-            if ctx.author.voice:
-                await ctx.author.voice.channel.connect()
-        await player_cog.play(ctx=ctx, user_input="bamse")
-
-        query = 'INSERT INTO pomodoros ("startingTime", "workLength", "breakLength", author) VALUES ({}, {}, {}, {})'.format(new_timer.startingDate, new_timer.workLength, new_timer.breakLength, new_timer.author_id)
-        await Db.myfetch(query)
-        
-        await ctx.message.delete()
+        await ctx.send(f"Break is over!\n"
+                       f"Perhabs time to start a new timer?",
+                       delete_after=self.configuration.long_delete_after_time)
+        Db.add_pomodoro_to_db(self._to_minutes(new_pomodoro.work_timer.duration), self._to_minutes(new_pomodoro.break_timer.duration), ctx.message.author.id, new_pomodoro.work_timer.starting_time)
 
     @staticmethod
-    async def get_lengths_from_message(message):
-        x = [int(s) for s in message.content.split() if s.isdigit()] # Gets all the digits from the string and saves in a list of integers.
-        if len(x) == 0:
-            author_id = message.author.id
-            query = 'SELECT "prefWorkTimer", "prefBreakTimer" FROM users WHERE id={}'.format(author_id)
-            y = await Db.myfetch(query)
-            work_timer = y[0][0]
-            break_timer = y[0][1]
-            return work_timer * 60, break_timer * 60
-        elif len(x) == 2:
-            work_length = x[0]
-            break_length = x[1]
-            return work_length * 60, break_length * 60
-        else:
-            print("Something went wrong.")
+    def _get_work_break_length(author_id):
+        user = Db.get_user_by_id(author_id)
+        return user.preferred_work_timer, user.preferred_break_timer
 
-    # Idk something needs to be done with this formatting. Its not doing it right xd
-    # strftime eller sådan noget
     @staticmethod
-    def format_time(work_length, break_length, new_timer):
-        x = new_timer.startingTime + datetime.timedelta(seconds=work_length)
-        y = new_timer.startingTime + datetime.timedelta(seconds=work_length + break_length)
-        work_minute = x.minute
-        work_second = x.second
-        break_minute = y.minute
-        break_second = y.second
-        if x.minute <= 9:
-            work_minute = int(str(0) + str(x.minute))
-        if x.second <= 9:
-            work_second = int(str(0) + str(x.second))
-        if y.minute <= 9:
-            break_minute = int(str(0) + str(y.minute))
-        if x.second <= 9:
-            break_second = int(str(0) + str(y.second))
+    def _to_minutes(timedelta):
+        return timedelta.total_seconds() / CONSTANT_SECONDS_IN_A_MINUTE
 
-        workEndTime = "{}:{}:{}".format(x.hour, work_minute, work_second)
-        breakEndTime = "{}:{}:{}".format(y.hour, break_minute, break_second)
-        return workEndTime, breakEndTime
+
+def setup(bot):
+    bot.add_cog(PomodoroCog(bot))
+
+
+class Timer:
+    def __init__(self, duration: datetime.timedelta):
+        self.duration = duration
+        self.starting_time = None
+
+    async def start(self):
+        self.starting_time = datetime.datetime.now()
+        await asyncio.sleep(self.duration.total_seconds())
+
+    def get_remaining_time_in_seconds(self):
+        return datetime.timedelta(datetime.datetime.now() - self.starting_time)
+
+
+class PomodoroTimer:
+    def __init__(self, category_id, work_duration, break_duration, name=None):
+        self.category_id = category_id
+        self.work_timer = Timer(work_duration)
+        self.break_timer = Timer(break_duration)
+        self.name = name
+        self.total_time = self.work_timer.duration + self.break_timer.duration
+        self.starting_time = datetime.datetime.now()
+
+    def get_end_work_time(self):
+        return self.starting_time + self.work_timer.duration
+
+    def get_end_break_time(self):
+        return self.starting_time + self.break_timer.duration
+
+    def __eq__(self, other):
+        return isinstance(other, PomodoroTimer) and \
+               other.category_id == self.category_id and \
+               other.work_timer.duration == self.work_timer.duration and \
+               other.break_timer.duration == self.break_timer.duration and \
+               other.name == self.name
+
+
+class PomodoroManager:
+    def __init__(self):
+        self._list_of_pomodoros = []
+
+    def start_new_pomodoro(self, category_id, work_duration, break_duration, name=None):
+        new_pomodoro = PomodoroTimer(category_id, work_duration, break_duration, name)
+        self._list_of_pomodoros.append(new_pomodoro)
+        return new_pomodoro
+
+    def find_pomodoro_timer(self, name=None, category_id=None):
+        return [e for e in self._list_of_pomodoros if (e.name == name and name is not None) or e.category_id == category_id]
+
+
+
+
+    '''
+
+    def get_remaining_time(self):
+        hours = 0
+        minutes = 0
+        elapsed_time_in_seconds = (datetime.datetime.now() - self.starting_time).total_seconds()
+
+        remaining_time_in_seconds = self.length - elapsed_time_in_seconds
+
+        while remaining_time_in_seconds > self.seconds_in_an_hour:
+            hours, remaining_time_in_seconds = divmod(remaining_time_in_seconds, self.seconds_in_an_hour)
+        while remaining_time_in_seconds > self.seconds_in_a_minute:
+            minutes, remaining_time_in_seconds = divmod(remaining_time_in_seconds, self.seconds_in_a_minute)
+
+        formatted_remaining_time = ('%02d:%02d:%02d' % (hours, minutes, remaining_time_in_seconds))
+        return formatted_remaining_time
 
     @commands.command(name='time', brief="Remaining time on pomodoro timer", help="time timerName, currently needs this timer name cause its not fully operational yet :D")
     async def _time(self, ctx):
@@ -129,37 +170,37 @@ class Pomodoro(commands.Cog):
         await ctx.message.delete()
 
 
-def setup(bot):
-    bot.add_cog(Pomodoro(bot))
+
+
 
 
 class Timer:
     def __init__(self, author_id, work_length, break_length):
         self.author_id = author_id
-        self.workLength = work_length
-        self.breakLength = break_length
-        self.startingTime = datetime.datetime.now()
-        self.startingDate = datetime.datetime.now().date() # A little hack for now
+        self.work_length = work_length
+        self.break_length = break_length
+        self.starting_time = datetime.datetime.now()
+        self.starting_date = datetime.datetime.now().date() # A little hack for now
         self.workBool = True
 
     async def work_timer(self):
         self.workBool = True
-        await asyncio.sleep(self.workLength)
+        await asyncio.sleep(self.work_length)
 
     async def break_timer(self):
         self.workBool = False
-        await asyncio.sleep(self.breakLength)
+        await asyncio.sleep(self.break_length)
 
     def calculate_remaining_time(self):
         hours = 0
         minutes = 0
-        duration = datetime.datetime.now() - self.startingTime
+        duration = datetime.datetime.now() - self.starting_time
         durationInSeconds = duration.total_seconds()
 
         if self.workBool:
-            remainingTimeInSeconds = self.workLength - durationInSeconds
+            remainingTimeInSeconds = self.work_length - durationInSeconds
         else:
-            remainingTimeInSeconds = self.breakLength - durationInSeconds
+            remainingTimeInSeconds = self.break_length - durationInSeconds
         
         if remainingTimeInSeconds > 3600:
             hours, remainingTimeInSeconds = divmod(remainingTimeInSeconds, 3600)
@@ -169,3 +210,4 @@ class Timer:
         formattedRemainingTime = ('%02d:%02d:%02d' % (hours, minutes, remainingTimeInSeconds))
         print(formattedRemainingTime)
         return formattedRemainingTime
+'''

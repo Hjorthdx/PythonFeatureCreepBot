@@ -105,6 +105,9 @@
     pip install Pillow
 
 
+# Rename alting til commands
+
+
 # Notes to self
     # Help command
         Thing that deletes .help is in: class _HelpCommandImpl(Command): (line 182) in the prepare method.

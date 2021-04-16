@@ -1,4 +1,4 @@
-import unittest
+'''import unittest
 import datetime
 import sys
 sys.path.insert(0, "C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot/Cogs")
@@ -91,3 +91,5 @@ class TestSpeedrun(unittest.TestCase):
         expected = "Test"
         dummySpeedrun.end_race("Test")
         self.assertEqual(expected, dummySpeedrun.winner)
+
+'''
