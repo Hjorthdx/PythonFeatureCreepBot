@@ -10,6 +10,7 @@ class User(Db.Base):
     down_votes = Column(Integer)
     preferred_work_timer = Column(Integer)
     preferred_break_timer = Column(Integer)
+    #balance = Column(Integer) # For the casino cog is the current plan.
 
     def __repr__(self):
         return f"<User(id={self.id}, name={self.name}, opdutter={self.up_votes}, neddutter={self.down_votes}, work/break timer={self.preferred_work_timer}/{self.preferred_break_timer}>\n"

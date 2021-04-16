@@ -1,3 +1,5 @@
+# Repository pattern possible here ?
+
 import os
 from dotenv import load_dotenv
 
@@ -46,6 +48,19 @@ def get_highest_up_votes():
 def get_highest_down_votes():
     return session.query(User).order_by(User.up_votes.desc()).first()
 
+
 def add_pomodoro_to_db(work_length, break_length, author_id, starting_time):
     session.add(Pomodoro(work_length=work_length, break_length=break_length, author=author_id, starting_time=starting_time))
+    session.commit()
+
+
+def get_preferred_work_and_break_timer(_id):
+    user = session.query(User).filter_by(id=_id).first()
+    return user.preferred_work_timer, user.preferred_break_timer
+
+
+def update_preferred_work_and_break_timer(_id, preferred_work_timer, preferred_break_timer):
+    session.query(User).filter(User.id == _id).update({User.preferred_work_timer: preferred_work_timer,
+                                                       User.preferred_break_timer: preferred_break_timer},
+                                                      synchronize_session=False)
     session.commit()

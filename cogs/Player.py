@@ -11,7 +11,6 @@ class Player(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.configuration = bot.get_cog("Configuration")
-        self.base_path = "C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot/mp3-files/"
         self.volume = .5
         self.queue = asyncio.PriorityQueue()
         self.context_list = []
@@ -73,7 +72,7 @@ class Player(commands.Cog):
 
     @commands.command(brief="play slet dem. !available for list of all mp3's")
     async def play(self, ctx, *, user_input):
-        mp3_path = self.base_path + user_input + ".mp3"
+        mp3_path = self.configuration.mp3_folder_path + user_input + ".mp3"
         if ctx.voice_client.is_playing():
             current_audio_source = ctx.voice_client.source
             ctx.voice_client.pause()
@@ -108,7 +107,7 @@ class Player(commands.Cog):
 
     def _available(self):
         available_mp3_files = "```**Available mp3 files:**\n"
-        for filename in os.listdir(self.base_path):
+        for filename in os.listdir(self.configuration.mp3_folder_path):
             if filename.endswith('.mp3'):
                 available_mp3_files += f"{filename[:-4]}\n"
         available_mp3_files += "```"

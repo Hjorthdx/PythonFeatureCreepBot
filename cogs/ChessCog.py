@@ -18,7 +18,6 @@ class ChessCog(commands.Cog, name="Chess"):
         self.allSendMsgs = []
         self.whiteTurn = True
 
-
     @commands.Cog.listener()
     async def on_ready(self):
         print("Chess cog is loaded")

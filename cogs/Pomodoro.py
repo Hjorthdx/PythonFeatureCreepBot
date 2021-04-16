@@ -36,7 +36,6 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
     # Læs indtil der ikke er mere. Sidste parameter kun. Prøv at læs doc
     @commands.command()
     async def pomodoro(self, ctx, work_length=None, break_length=None, name=None):
-        await ctx.invoke(self.bot.get_command('play'), user_input="bamse")
         player_cog = self.bot.get_cog("Player")
         if work_length is None or break_length is None:
             work_length, break_length = self._get_work_break_length(ctx.message.author.id)
@@ -48,11 +47,11 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
 
         await ctx.send(f"Starting pomodoro with timers: "
                        f"{self._to_minutes(new_pomodoro.work_timer.duration)} / {self._to_minutes(new_pomodoro.break_timer.duration)}!\n"
-                       f"Work ends at: {new_pomodoro.get_end_work_time()}\n"
-                       f"Break ends at: {new_pomodoro.get_end_break_time()}\n",
+                       f"Work ends at: {self._to_string_format(new_pomodoro.get_end_work_time())}\n"
+                       f"Break ends at: {self._to_string_format(new_pomodoro.get_end_break_time())}\n",
                        delete_after=new_pomodoro.total_time.total_seconds())
         await new_pomodoro.work_timer.start()
-        #await player_cog.ensure_voice(ctx=ctx)
+        await player_cog.ensure_voice(ctx=ctx)
         await ctx.invoke(self.bot.get_command('play'), user_input="bamse")
 
         await ctx.send(f"Work is over!\n"
@@ -60,6 +59,7 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
                        f"Break ends at {new_pomodoro.get_end_break_time()}",
                        delete_after=self.configuration.long_delete_after_time)
         await new_pomodoro.break_timer.start()
+        await player_cog.ensure_voice(ctx=ctx)
         await player_cog.play(ctx=ctx, user_input="bamse")
         await ctx.send(f"Break is over!\n"
                        f"Perhabs time to start a new timer?",
@@ -75,6 +75,55 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
     def _to_minutes(timedelta):
         return timedelta.total_seconds() / CONSTANT_SECONDS_IN_A_MINUTE
 
+    @staticmethod
+    def _to_string_format(time):
+        return time.strftime("%H:%M:%S")
+
+    @commands.command(name="changeDefault", brief=".default 25 5 e.g.", aliases=['default', 'changedefault', 'change'])
+    async def change_default(self, ctx, preferred_work_timer=None, preferred_break_timer=None):
+        if preferred_work_timer is None or preferred_break_timer is None:
+            preferred_work_timer, preferred_break_timer = Db.get_preferred_work_and_break_timer(ctx.message.author.id)
+            await ctx.send(f"Please specify both preferred work length and break length. Your current defaults are: "
+                           f"{preferred_work_timer} / {preferred_break_timer}",
+                           delete_after=self.configuration.short_delete_after_time)
+        else:
+            Db.update_preferred_work_and_break_timer(ctx.message.author.id, preferred_work_timer, preferred_break_timer)
+            await ctx.send(f"Updated your default values to {preferred_work_timer} / {preferred_break_timer}",
+                           delete_after=self.configuration.short_delete_after_time)
+
+    @commands.command(name="time")
+    async def get_remaining_time(self, ctx, name=None):
+        if name is not None:
+            timer = self.pomodoro_manager.find_pomodoro_timer(name=name)
+        else:
+            timer = self.pomodoro_manager.find_pomodoro_timer(category_id=ctx.message.channel.category_id)
+        if not timer:
+            print("Something went wrong")
+            await ctx.send("Could not find any timers!", delete_after=self.configuration.medium_delete_after_time)
+        else:
+            if timer[0].is_work_over():
+                break_timer_remaining_time = timer[0].break_timer.get_remaining_time().total_seconds()
+                await ctx.send(f"Remaining time: {self._timedelta_to_string_format(break_timer_remaining_time)}",
+                               delete_after=self.configuration.medium_delete_after_time)
+            else:
+                work_timer_remaining_time = timer[0].work_timer.get_remaining_time()
+                await ctx.send(f"Remaining time: {self._timedelta_to_string_format(work_timer_remaining_time)}",
+                               delete_after=self.configuration.medium_delete_after_time)
+
+    @staticmethod
+    def _timedelta_to_string_format(time_delta):
+        hours = 0
+        minutes = 0
+        remaining_time_in_seconds = time_delta.total_seconds()
+
+        if remaining_time_in_seconds > CONSTANT_SECONDS_IN_AN_HOUR:
+            hours, remaining_time_in_seconds = divmod(remaining_time_in_seconds, CONSTANT_SECONDS_IN_AN_HOUR)
+        if remaining_time_in_seconds > CONSTANT_SECONDS_IN_A_MINUTE:
+            minutes, remaining_time_in_seconds = divmod(remaining_time_in_seconds, CONSTANT_SECONDS_IN_A_MINUTE)
+
+        formatted_remaining_time = ('%02d:%02d:%02d' % (hours, minutes, remaining_time_in_seconds))
+        return formatted_remaining_time
+
 
 def setup(bot):
     bot.add_cog(PomodoroCog(bot))
@@ -84,13 +133,15 @@ class Timer:
     def __init__(self, duration: datetime.timedelta):
         self.duration = duration
         self.starting_time = None
+        self.end_time = None
 
     async def start(self):
         self.starting_time = datetime.datetime.now()
+        self.end_time = self.starting_time + self.duration
         await asyncio.sleep(self.duration.total_seconds())
 
-    def get_remaining_time_in_seconds(self):
-        return datetime.timedelta(datetime.datetime.now() - self.starting_time)
+    def get_remaining_time(self):
+        return self.duration - (datetime.datetime.now() - self.starting_time)
 
 
 class PomodoroTimer:
@@ -106,7 +157,10 @@ class PomodoroTimer:
         return self.starting_time + self.work_timer.duration
 
     def get_end_break_time(self):
-        return self.starting_time + self.break_timer.duration
+        return self.starting_time + self.work_timer.duration + self.break_timer.duration
+
+    def is_work_over(self):
+        return datetime.datetime.now() > (self.work_timer.starting_time + self.work_timer.duration)
 
     def __eq__(self, other):
         return isinstance(other, PomodoroTimer) and \
@@ -127,87 +181,3 @@ class PomodoroManager:
 
     def find_pomodoro_timer(self, name=None, category_id=None):
         return [e for e in self._list_of_pomodoros if (e.name == name and name is not None) or e.category_id == category_id]
-
-
-
-
-    '''
-
-    def get_remaining_time(self):
-        hours = 0
-        minutes = 0
-        elapsed_time_in_seconds = (datetime.datetime.now() - self.starting_time).total_seconds()
-
-        remaining_time_in_seconds = self.length - elapsed_time_in_seconds
-
-        while remaining_time_in_seconds > self.seconds_in_an_hour:
-            hours, remaining_time_in_seconds = divmod(remaining_time_in_seconds, self.seconds_in_an_hour)
-        while remaining_time_in_seconds > self.seconds_in_a_minute:
-            minutes, remaining_time_in_seconds = divmod(remaining_time_in_seconds, self.seconds_in_a_minute)
-
-        formatted_remaining_time = ('%02d:%02d:%02d' % (hours, minutes, remaining_time_in_seconds))
-        return formatted_remaining_time
-
-    @commands.command(name='time', brief="Remaining time on pomodoro timer", help="time timerName, currently needs this timer name cause its not fully operational yet :D")
-    async def _time(self, ctx):
-        needed_timer = self.current_timers[0]
-        for timer in self.current_timers:
-            if ctx.message.author.id == timer.author_id:
-                needed_timer = timer
-        remaining_time = needed_timer.calculate_remaining_time()
-        await ctx.send("remaining time on timer {}: {}".format(needed_timer.name, remaining_time), delete_after=15)
-        await ctx.message.delete()
-
-    @commands.command(name="changeDefault", brief=".default 25 5 e.g.", aliases=['default', 'changedefault', 'change'])
-    async def change_default(self, ctx, pref_work, pref_break):
-        if pref_work is None or pref_break is None:
-            query = 'SELECT "prefWorkTimer", "prefBreakTimer" FROM users WHERE id={}'.format(ctx.message.author.id)
-            x = await Db.myfetch(query)
-            await ctx.send(f"Please specify both preferred work length and break length. Your current defaults are: {x[0][0]} / {x[0][1]}", delete_after=15)
-        query = 'UPDATE users SET "prefWorkTimer" = {}, "prefBreakTimer" = {} WHERE id={}'.format(pref_work, pref_break, ctx.message.author.id)
-        await Db.myfetch(query)
-        await ctx.send(f"Updated your default values to {pref_work} / {pref_break}", delete_after=15)
-        await ctx.message.delete()
-
-
-
-
-
-
-class Timer:
-    def __init__(self, author_id, work_length, break_length):
-        self.author_id = author_id
-        self.work_length = work_length
-        self.break_length = break_length
-        self.starting_time = datetime.datetime.now()
-        self.starting_date = datetime.datetime.now().date() # A little hack for now
-        self.workBool = True
-
-    async def work_timer(self):
-        self.workBool = True
-        await asyncio.sleep(self.work_length)
-
-    async def break_timer(self):
-        self.workBool = False
-        await asyncio.sleep(self.break_length)
-
-    def calculate_remaining_time(self):
-        hours = 0
-        minutes = 0
-        duration = datetime.datetime.now() - self.starting_time
-        durationInSeconds = duration.total_seconds()
-
-        if self.workBool:
-            remainingTimeInSeconds = self.work_length - durationInSeconds
-        else:
-            remainingTimeInSeconds = self.break_length - durationInSeconds
-        
-        if remainingTimeInSeconds > 3600:
-            hours, remainingTimeInSeconds = divmod(remainingTimeInSeconds, 3600)
-        if remainingTimeInSeconds > 60:
-            minutes, remainingTimeInSeconds = divmod(remainingTimeInSeconds, 60)
-
-        formattedRemainingTime = ('%02d:%02d:%02d' % (hours, minutes, remainingTimeInSeconds))
-        print(formattedRemainingTime)
-        return formattedRemainingTime
-'''

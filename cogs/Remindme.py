@@ -15,6 +15,10 @@ class Remindme(commands.Cog):
     async def on_ready(self):
         print("Remindme cog is loaded")
 
+    # Overhold formattet.
+    # Tid er 00:00:00
+    # Dato er 00-00-00
+    # fx
     @commands.command(brief="Reminds you about something",
                       help="Only accepts days, hours, minutes, seconds rn. \nE.g. 1 day 2 hours 3 minutes 4 seconds")
     async def remindme(self, ctx, time, text):

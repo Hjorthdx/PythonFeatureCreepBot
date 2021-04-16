@@ -1,9 +1,10 @@
 import unittest
 import datetime
+from unittest import mock
 from cogs import Pomodoro
 
 
-class TestKarma(unittest.TestCase):
+class TestPomodoro(unittest.TestCase):
 
     def test_PomodoroManager_start_new_pomodoro_name_is_none(self):
         expected = Pomodoro.PomodoroTimer(category_id=1, work_duration=50, break_duration=10, name=None)
@@ -84,7 +85,10 @@ class TestKarma(unittest.TestCase):
         result = pomodoro_timer.get_end_break_time()
         self.assertEqual(result, expected)
 
-    #@mock.patch("Db.get_user_by_name", return_value=User(id=1, name="username_1"))
+    # To do unit tests.
+    # Change default and remaining time
+    #@mock.patch("Db.get_preferred_work_and_break_timer", return_value=(50, 10))
+    #def test_change_default_preferred_work_and_break_timer_is_none(self):
 
 
 if __name__ == '__main__':
