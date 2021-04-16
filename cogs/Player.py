@@ -36,13 +36,15 @@ class Player(commands.Cog):
             self.current_context = ctx
             async with ctx.typing():
                 if isinstance(current_song, discord.PCMVolumeTransformer):
-                    ctx.voice_client.play(current_song, after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
+                    ctx.voice_client.play(current_song,
+                                          after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
                 else:
                     audio_source = await YTDLSource.from_url(current_song, loop=self.bot.loop, stream=True)
                     audio_source.volume = self.volume
-                    ctx.voice_client.play(audio_source, after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
+                    ctx.voice_client.play(audio_source,
+                                          after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
                     await ctx.send(f'Now playing: {audio_source.title} at {self.volume * 100}%',
-                           delete_after=audio_source.duration)  # Only writes for yt. Does not write anything for .play
+                                   delete_after=audio_source.duration)  # Only writes for yt. Does not write anything for .play
             await self.next.wait()
 
     # Der er noget her med at current_context er jo None i starten
@@ -55,18 +57,14 @@ class Player(commands.Cog):
     # Idk det er sent.
     async def ensure_left_voice(self):
         while True:
-            print("Start")
             if self.current_context is None:
-                print("ctx is none")
                 await asyncio.sleep(15)
                 continue
             try:
                 if self.queue.empty() and not self.current_context.voice_client.is_playing():
-                    print("q empty not playing")
                     await self.current_context.voice_client.disconnect()
                 await asyncio.sleep(15)
             except:
-                print("current_context.voice_client NoneType object")
                 await asyncio.sleep(15)
                 continue
 
@@ -117,7 +115,8 @@ class Player(commands.Cog):
                       aliases=['v'])
     async def volume(self, ctx, volume: int):
         if ctx.voice_client is None:
-            return await ctx.send("Not connected to a voice channel.", delete_after=self.configuration.short_delete_after_time)
+            return await ctx.send("Not connected to a voice channel.",
+                                  delete_after=self.configuration.short_delete_after_time)
 
         self.volume = volume / 100
         ctx.voice_client.source.volume = self.volume

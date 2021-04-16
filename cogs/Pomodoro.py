@@ -15,23 +15,31 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
         self.bot = bot
         self.configuration = bot.get_cog("Configuration")
         self.pomodoro_manager = PomodoroManager()
-        self.in_room_counter = 0
 
     @commands.Cog.listener()
     async def on_ready(self):
         print("Pomodoro cog is loaded")
 
-    # Not refactored yet
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         if after.channel is None:
-            self.in_room_counter = self.in_room_counter - 1
-        elif before is None and after is not None:
-            self.in_room_counter = self.in_room_counter + 1
-        
-        if self.in_room_counter >= 2 and not self.current_timers:
-            x = self.bot.get_channel(619094316106907660)
-            await x.send("Pomodoro?", delete_after=self.configuration.very_long_delete_after_time)
+            return
+        if len(after.channel.members) == 3:
+            if after.channel.category_id == self.configuration.project_category_id and \
+                    self.pomodoro_manager.is_category_without_timer(self.configuration.generel_room_id):
+                channel = self.bot.get_channel(self.configuration.generel_room_id)
+                await channel.send("Pomodoro?", delete_after=self.configuration.very_long_delete_after_time)
+
+            elif after.channel.category_id == self.configuration.pensionist_category_id and \
+                    self.pomodoro_manager.is_category_without_timer(self.configuration.pensionist_generel_room_id):
+                channel = self.bot.get_channel(self.configuration.pensionist_generel_room_id)
+                await channel.send("Pomodoro?", delete_after=self.configuration.very_long_delete_after_time)
+
+            elif after.channel.category_id == self.configuration.young_guns_category_id and \
+                    self.pomodoro_manager.is_category_without_timer(self.configuration.young_guns_category_id):
+                channel = self.bot.get_channel(self.configuration.young_guns_generel_room_id)
+                await channel.send("Pomodoro?", delete_after=self.configuration.very_long_delete_after_time)
+
 
     # Læs indtil der ikke er mere. Sidste parameter kun. Prøv at læs doc
     @commands.command()
@@ -181,3 +189,14 @@ class PomodoroManager:
 
     def find_pomodoro_timer(self, name=None, category_id=None):
         return [e for e in self._list_of_pomodoros if (e.name == name and name is not None) or e.category_id == category_id]
+
+    def is_list_of_pomodoros_empty(self):
+        return not self._list_of_pomodoros
+
+    # Kan det her one lines?
+    def is_category_without_timer(self, category_id):
+        timers_attached_to_category = [e for e in self._list_of_pomodoros if (e.category_id == category_id)]
+        if not timers_attached_to_category:
+            return True
+        else:
+            return False

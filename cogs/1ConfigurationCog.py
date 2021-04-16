@@ -21,6 +21,18 @@ class Configuration(commands.Cog):
         self.mp3_folder_path = "C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot/mp3-files/"
         self.gifs_folder_path = "C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot/gifs/"
 
+        # Fælles
+        self.project_category_id = 619095311079571466
+        self.generel_room_id = 619094316106907660
+
+        # Pensionist
+        self.pensionist_generel_room_id = 807166593570308126
+        self.pensionist_category_id = 807166232943656980
+
+        # Young guns
+        self.young_guns_generel_room_id = 807166921417424896
+        self.young_guns_category_id = 807166416657580073
+
     @commands.Cog.listener()
     async def on_ready(self):
         print("Configuration cog is loaded")
