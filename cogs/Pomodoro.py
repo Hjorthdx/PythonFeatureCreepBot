@@ -56,7 +56,7 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
 
         await ctx.send(f"Work is over!\n"
                        f"Kick back, relax, and grab yourself a beverage!\n"
-                       f"Break ends at {new_pomodoro.get_end_break_time()}",
+                       f"Break ends at {self._to_string_format(new_pomodoro.get_end_break_time())}",
                        delete_after=self.configuration.long_delete_after_time)
         await new_pomodoro.break_timer.start()
         await player_cog.ensure_voice(ctx=ctx)
@@ -102,7 +102,7 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
             await ctx.send("Could not find any timers!", delete_after=self.configuration.medium_delete_after_time)
         else:
             if timer[0].is_work_over():
-                break_timer_remaining_time = timer[0].break_timer.get_remaining_time().total_seconds()
+                break_timer_remaining_time = timer[0].break_timer.get_remaining_time()
                 await ctx.send(f"Remaining time: {self._timedelta_to_string_format(break_timer_remaining_time)}",
                                delete_after=self.configuration.medium_delete_after_time)
             else:

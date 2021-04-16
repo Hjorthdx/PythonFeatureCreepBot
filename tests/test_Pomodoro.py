@@ -81,14 +81,42 @@ class TestPomodoro(unittest.TestCase):
         break_duration = datetime.timedelta(minutes=10)
         pomodoro_timer = Pomodoro.PomodoroTimer(category_id=1, work_duration=work_duration,
                                                 break_duration=break_duration, name="Test")
-        expected = datetime.datetime.now() + break_duration
+        expected = datetime.datetime.now() + work_duration + break_duration
         result = pomodoro_timer.get_end_break_time()
         self.assertEqual(result, expected)
 
-    # To do unit tests.
-    # Change default and remaining time
-    #@mock.patch("Db.get_preferred_work_and_break_timer", return_value=(50, 10))
-    #def test_change_default_preferred_work_and_break_timer_is_none(self):
+    def test_PomodoroTimer_is_work_over_work_timer_in_the_past(self):
+        work_duration = datetime.timedelta(minutes=50)
+        break_duration = datetime.timedelta(minutes=10)
+        timer = Pomodoro.Timer(work_duration)
+        timer.starting_time = datetime.datetime(2020, 12, 24)
+        pomodoro_timer = Pomodoro.PomodoroTimer(category_id=1, work_duration=work_duration,
+                                                break_duration=break_duration, name="Test")
+        pomodoro_timer.work_timer = timer
+        expected = True
+        result = pomodoro_timer.is_work_over()
+        self.assertEqual(result, expected)
+
+    def test_PomodoroTimer_is_work_over_work_timer_in_the_future(self):
+        work_duration = datetime.timedelta(minutes=50)
+        break_duration = datetime.timedelta(minutes=10)
+        timer = Pomodoro.Timer(work_duration)
+        timer.starting_time = datetime.datetime(2100, 12, 24)
+        pomodoro_timer = Pomodoro.PomodoroTimer(category_id=1, work_duration=work_duration,
+                                                break_duration=break_duration, name="Test")
+        pomodoro_timer.work_timer = timer
+        expected = False
+        result = pomodoro_timer.is_work_over()
+        self.assertEqual(result, expected)
+
+    # Not sure if this is a good test actually.
+    def test_Timer_get_remaining_time(self):
+        timer = Pomodoro.Timer(datetime.timedelta(minutes=50))
+        timer.starting_time = datetime.datetime.now()
+        result = timer.get_remaining_time()
+        expected = datetime.timedelta(minutes=50) - (datetime.datetime.now() - timer.starting_time)
+
+        self.assertEqual(result, expected)
 
 
 if __name__ == '__main__':
