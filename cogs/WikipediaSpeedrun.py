@@ -96,6 +96,10 @@ def setup(bot):
     bot.add_cog(WikipediaSpeedrun(bot))
 
 
+# Det her virker som noget som burde være en specialisering aff et speedrun
+# Altså Speedrun er min super klasse og så jeg har en WikipediaSpeedrun som arver fra Speedrun.
+# Så skal der bare lige fjernes nogle ting fra den der klasse, men ellers burde der ikke ændre sig så meget
+# Så måske? fejler ikke alle testene hvis jeg lige laver den lille refactor.
 class Speedrun:
     def __init__(self):
         self.participants = []

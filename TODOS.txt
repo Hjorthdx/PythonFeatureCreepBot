@@ -1,16 +1,4 @@
 # Actual TODO's
-    - Database needs to have methods for each db thing. There is no reason for e.g. karma cog to know how to make a SQL
-        statement. This concern should be seperated to only be in Db.py cause its not part of karma cogs functionality.
-
-    - Update last cogs to support the new database.
-    - This includes:
-        - Set up tables for last cogs aswell in Db.
-            - Have some value for user_id, so I can join tables.
-        - Write methods in Db for the tasks in the cog. No SQL statements within the cogs themself.
-
-    - Fix the remaining time command (POMODORO). Should give an error is negative time
-            Doesnt do that now, just tells there is -x time left on the timer.
-
     FIX ALLE BRIEF COMMENTS
         De skal fortælle kort hvad commanden gør
         Derefter skal alle help fixes
@@ -20,10 +8,14 @@
 
     UNIT TESTS !!
 
+    UtilityCog i stedet for Project og Remindme cog.
+        Project cog er jo basicly bare et pin tool og remind er basicly bare et lortet remindme lige nu som ikke virker
+        Sammensæt de to som et slags utility og så ja gør det der
+        Maybe?
+
 
 # IDEAS - Basicly backlog I suppose
     # Random ideas / mini tasks
-        # Tolower all user inputs, so they are not case sensitive.
         # Make installation guide to use the bot
             Perhabs docker so its basicly plug and play? :o)
 

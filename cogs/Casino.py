@@ -24,22 +24,22 @@ class Casino(commands.Cog):
     async def roulette(self, ctx, bet=None, amount=None):
         random_number = self.roulette.get_next_spin()
         message = await ctx.send("Spinning the wheel :o)",
-                       file=discord.File(self.configuration.gifs_folder_path + str(random_number) + '.gif'),
-                       delete_after=self.configuration.long_delete_after_time)
+                                 file=discord.File(self.configuration.gifs_folder_path + str(random_number) + '.gif'),
+                                 delete_after=self.configuration.long_delete_after_time)
         await asyncio.sleep(10)  # Should really be based on the video playing.
         await message.edit(content=f"The winning number is: {random_number}")
 
         if self.roulette.is_correct_guess(bet):
             await ctx.send(f"You guessed the right number!\n"
-                           f"You win {amount} x 35 = {amount*35}",
+                           f"You win {amount} x 35 = {amount * 35}",
                            delete_after=self.configuration.medium_delete_after_time)
         if self.roulette.is_even_number() and bet == 'black':
             await ctx.send(f"The number is an even number!\n"
-                           f"You win {amount} x 2 = {amount*2}",
+                           f"You win {amount} x 2 = {amount * 2}",
                            delete_after=self.configuration.medium_delete_after_time)
         if self.roulette.is_odd_number() and bet == 'red':
             await ctx.send(f"The number is an odd number!\n"
-                           f"You win {amount} x 2 = {amount*2}",
+                           f"You win {amount} x 2 = {amount * 2}",
                            delete_after=self.configuration.medium_delete_after_time)
 
 
@@ -70,6 +70,3 @@ class Roulette:
 
     def is_even_number(self):
         return self.random_number in self.black_numbers
-
-
-

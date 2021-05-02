@@ -14,6 +14,8 @@ class Karma(commands.Cog):
 
         # Emotes
         # Perhabs these should be moved into the configuration aswell ?
+        # I need them in utility aswell so I think they probably should.
+        # Jeg skriver dem ind i configuration med det samme og ændrer herinde senere.
         self.kurt_approved = 619818932475527210
         self.kurt_disapproved = 651028634945060864
         self.meme_channel = 619105859615719434
@@ -130,6 +132,31 @@ class Karma(commands.Cog):
                 await new_leader.add_roles(role, reason='Overthrew the old leader for most nedduts')
         except IndexError:
             print("List index out of range.")
+
+    @commands.command(brief="Does not update anything",
+                      help="Only recounts all the karma. It does not update the value in db")
+    async def recount_karma(self, ctx, author_id):
+        channel = self.bot.get_channel(self.meme_channel)
+        messages = await channel.history(limit=None).flatten()
+        print(len(messages))
+        total_karma, up_votes, down_votes = 0, 0, 0
+        for message in messages:
+            if message.author.id == author_id:
+                if message.reactions is not None:
+                    for reaction in message.reactions:
+                        try:
+                            if reaction.emoji.id == self.kurt_approved:
+                                up_votes += reaction.count
+                            elif reaction.emoji.id == self.kurt_disapproved:
+                                down_votes += reaction.count
+                        except AttributeError as e:
+                            print(e)
+        total_karma = up_votes + down_votes
+        await ctx.send(f"Karma has been recounted for author with id: {author_id}\n"
+                       f"Total karma: {total_karma}\n"
+                       f"Up votes: {up_votes}\n"
+                       f"Down votes: {down_votes}",
+                       delete_after=self.configuration.medium_delete_after_time)
 
 
 def setup(bot):

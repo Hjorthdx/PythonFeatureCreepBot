@@ -1,4 +1,12 @@
 # Repository pattern possible here ?
+# Seperate tables a bit more in the models
+# To something more like this perhabs:
+# User table som refer til både 0->* pomodoro tables, som indeholder pomodoro data ofc.
+# User table har så også et 1->1 til et preferred time table som indeholder de der to tider.
+# User table har så også idk
+# Tabte den lige lidt.
+# Min tanke er bare her at det hele handler jo omkring Users for alle de der metoder, så det er svært at adskille det af
+#
 
 import os
 from dotenv import load_dotenv

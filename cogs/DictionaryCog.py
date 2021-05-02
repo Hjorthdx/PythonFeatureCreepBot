@@ -116,7 +116,8 @@ class DictionaryCog(commands.Cog):
                       aliases=['synonym'])
     async def synonyms(self, ctx, *, word):
         synonyms_for_word = self._synonyms(word)
-        await ctx.send("Synonyms for: {}\n{}".format(word, synonyms_for_word), delete_after=self.configuration.long_delete_after_time)
+        await ctx.send(f"Synonyms for: {word}\n{synonyms_for_word}",
+                       delete_after=self.configuration.long_delete_after_time)
 
     @staticmethod
     def _synonyms(word):
@@ -135,15 +136,16 @@ class DictionaryCog(commands.Cog):
                       aliases=['antonym'])
     async def antonyms(self, ctx, *, word):
         antonyms_for_word = self._antonyms(word)
-        await ctx.send("Antonyms for: {}\n{}".format(word, antonyms_for_word), delete_after=self.configuration.long_delete_after_time)
+        await ctx.send(f"Antonyms for: {word}\n{antonyms_for_word}",
+                       delete_after=self.configuration.long_delete_after_time)
 
     @staticmethod
     def _antonyms(word):
         antonyms_for_word = []
         for syn in wordnet.synsets(word):
-            for l in syn.lemmas():
-                if l.antonyms():
-                    antonyms_for_word.append(l.antonyms()[0].name())
+            for lemma in syn.lemmas():
+                if lemma.antonyms():
+                    antonyms_for_word.append(lemma.antonyms()[0].name())
 
         for x in antonyms_for_word:
             if x == word:
@@ -155,9 +157,10 @@ class DictionaryCog(commands.Cog):
     async def definition(self, ctx, *, word):
         syns = wordnet.synsets(word)
         try:
-            await ctx.send("Definition of {} is:\n{}".format(word, syns[0].definition()), delete_after=self.configuration.short_delete_after_time)
+            await ctx.send(f"Definition of {word} is:\n{syns[0].definition()}",
+                           delete_after=self.configuration.short_delete_after_time)
         except IndexError:
-            print(f"Got the error here with the word {word}.") #  Not sure if this is me making the error or what it is.
+            print(f"Got the error here with the word {word}.")  # Not sure if this is me making the error or what it is.
             await ctx.send("Index out of range error", delete_after=self.configuration.short_delete_after_time)
 
 

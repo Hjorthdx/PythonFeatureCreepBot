@@ -1,9 +1,8 @@
-import discord
+import discord, os
 from discord.ext import commands
 
 
 class Configuration(commands.Cog):
-    # Some documentation
     # This is where all "constants" are placed.
     # Since they are not constant they are placed in this cog,
     # as it can then be reloaded on run time.
@@ -20,6 +19,8 @@ class Configuration(commands.Cog):
         self.most_down_votes_role_id = 762319929521209345
         self.mp3_folder_path = "C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot/mp3-files/"
         self.gifs_folder_path = "C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot/gifs/"
+        self.schedule_check_API_LINK = os.getenv("SCHEDULE_CHECK_API")
+        self.timeout_time = 60
 
         # Fælles
         self.project_category_id = 619095311079571466

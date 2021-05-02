@@ -36,7 +36,6 @@ class ChessCog(commands.Cog, name="Chess"):
         x = await ctx.send(file=discord.File('board.png'))
         self.allSendMsgs.append(x)
 
-    # Needs to check if it is one of the two players playing the game that is making the move.
     @commands.command(brief="Followed by the chess move",
                       help="Followed by coordinate: \npawn = just coordinate\nknight = N\nBishop = B\nQueen = Q\nRook "
                            "= R (Rhg1 e.g. if both rooks can get to g1)\nCapture = x e.g. exd5")
