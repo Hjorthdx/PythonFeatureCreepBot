@@ -1,6 +1,8 @@
 import discord
 import datetime
+import dateutil
 import asyncio
+import re
 from discord.ext import commands
 
 
@@ -9,53 +11,86 @@ class Remindme(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.reminders = []
+        self.configuration = bot.get_cog("Configuration")
+        self.reminder_manager = ReminderManager()
 
     @commands.Cog.listener()
     async def on_ready(self):
         print("Remindme cog is loaded")
 
-    # Overhold formattet.
-    # Tid er 00:00:00
-    # Dato er 00-00-00
-    # fx
-    @commands.command(brief="Reminds you about something",
-                      help="Only accepts days, hours, minutes, seconds rn. \nE.g. 1 day 2 hours 3 minutes 4 seconds")
-    async def remindme(self, ctx, time, text):
-        if text is None:
-            await ctx.send("No reminder text specified", delete_after=15)
-        new_reminder = reminder(time, text)
-        self.reminders.append(new_reminder)
-        await ctx.send("I will remind you about {} in {}.".format(new_reminder.text, new_reminder.time),
-                       delete_after=15)
-        await ctx.message.delete()
-        await new_reminder.start_reminder()
-        await ctx.send("{}, you asked me to remind you about {}, {} ago.".format(ctx.author.name, text, time),
-                       delete_after=15)
-        self.reminders.remove(new_reminder)
+    @commands.command()
+    async def remindme(self, ctx, time, *, message):
+        author = ctx.message.author
 
-    @commands.command(name="currentReminders", brief="Not implemented")
-    async def current_reminders(self, ctx):
-        await ctx.send("!say Throw new not implemented yet :P- en", delete_after=15)
-        await ctx.message.delete()
+        new_reminder = self.reminder_manager.add_new_reminder(ctx, author, time, message)
 
-    @commands.command(brief="Not implemented")
-    async def unremindme(self, ctx):
-        await ctx.send("!say Throw new not implemented yet :D -en", delete_after=15)
-        await ctx.message.delete()
-
-    @commands.command(brief="Not implemented 123")
-    async def remind(self, ctx, *, user):
-        await ctx.send("!say Throw new not implemented yet xD -en", delete_after=15)
-        await ctx.message.delete()
+        if new_reminder is None:
+            await ctx.send("Could not determine datetime. Please try again!", delete_after=self.configuration.short_delete_after_time)
+        else:
+            await ctx.send("I'll remind you then!", delete_after=self.configuration.short_delete_after_time)
 
 
 def setup(bot):
     bot.add_cog(Remindme(bot))
 
 
+class Reminder:
+    def __init__(self, ctx: commands.Context, author: int, text: str, time: datetime):
+        self.ctx = ctx
+        self.author = author
+        self.text = text
+        self.time = time
+
+    async def sleep(self):
+        await asyncio.sleep(self.time.total_seconds())
+
+from datetime import datetime
+from dateutil import parser
+from dateutil import tz
+from dateutil.relativedelta import relativedelta
+
+class ReminderManager:
+    def __init__(self, reminders: Reminder = None):
+        self.reminders = []
+
+    def add_new_reminder(self, ctx: commands.Context, author: int, time, message: str):
+        date_time = self._parse_datetime(time)
+        if date_time is None:
+            print("Could not determine datetime")
+            # Burde den skrive til brugeren her? Vel ikke.
+            # Den skal vel returnerer noget som siger om det gik godt til cog'et så den ved hvad den skal skrive.
+            return None
+
+        new_reminder = Reminder(ctx, author, message, date_time)
+        self.reminders.append(new_reminder)
+        new_reminder.sleep()
+        return new_reminder
+
+    def _parse_datetime(self, message: discord.message):
+        compiled = re.compile("""(?:(?P<years>[0-9])(?:years?|y))?
+                                     (?:(?P<months>[0-9]{1,2})(?:months?|mo))?
+                                     (?:(?P<weeks>[0-9]{1,4})(?:weeks?|w))?
+                                     (?:(?P<days>[0-9]{1,5})(?:days?|d))?
+                                     (?:(?P<hours>[0-9]{1,5})(?:hours?|h))?
+                                     (?:(?P<minutes>[0-9]{1,5})(?:minutes?|m))?
+                                     (?:(?P<seconds>[0-9]{1,5})(?:seconds?|s))?
+                                     """, re.VERBOSE)
+        match = compiled.fullmatch(message)
+        if match is None or not match.group(0):
+            try:
+                message = parser.parse(f"{message} GMT+2", tzinfos=tz.gettz("Europe/Copenhagen"))
+                return message
+            except:
+                return None
+
+        data = { k: int(v) for k, v in match.groupdict(default=0).items() }
+        now = datetime.datetime.now()
+        message = now + relativedelta(**data)
+        return message
+
+
 class reminder:
-    def __init__(self, time, text):
+    def __init__(self, time: datetime, text: str, user, ):
         print(time)
         self.time = time
         self.text = text

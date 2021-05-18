@@ -59,10 +59,10 @@ class Roulette:
         return self.random_number
 
     @staticmethod
-    def _get_random_int(_min, _max):
+    def _get_random_int(_min: int, _max: int):
         return random.randint(_min, _max)
 
-    def is_correct_guess(self, number):
+    def is_correct_guess(self, number: int):
         return number == self.random_number
 
     def is_odd_number(self):

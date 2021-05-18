@@ -13,6 +13,8 @@
         Sammensæt de to som et slags utility og så ja gør det der
         Maybe?
 
+    Load timers from db!
+
 
 # IDEAS - Basicly backlog I suppose
     # Random ideas / mini tasks

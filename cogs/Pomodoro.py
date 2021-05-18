@@ -26,8 +26,8 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
-        if after.channel is None or self._is_schedule_booked():
-            return
+        #if after.channel is None or self._is_schedule_booked():
+        #    return
         if len(after.channel.members) == self.group_size and before is None:
             if self._is_category_without_timer(after.channel.category_id, self.configuration.project_category_id):
                 reminder_message = await self._send_pomodoro_reminder_message(self.configuration.generel_room_id)
@@ -82,7 +82,7 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
                            delete_after=self.configuration.very_long_delete_after_time)
         return message
 
-    @commands.command(aliases=['po', 'pom', 'pomo', 'pomdro', 'pomdoro'])
+    @commands.command(aliases=['p', 'po', 'pom', 'pomo', 'pomdro', 'pomdoro'])
     async def pomodoro(self, ctx, work_length=None, break_length=None, name=None):
         # Temporary fix
         # This is done to be able to use the command with the syntax .po mytimer
@@ -111,15 +111,15 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
                        delete_after=new_pomodoro.total_time.total_seconds())
         await new_pomodoro.work_timer.start()
         await player_cog.ensure_voice(ctx=ctx)
-        await player_cog.play(ctx=ctx, user_input="bamse")
+        await player_cog.play(ctx=ctx, search="bamse")
 
         await ctx.send(f"Work is over!\n"
                        f"Kick back, relax, and grab yourself a beverage!\n"
                        f"Break ends at {self._to_string_format(new_pomodoro.get_end_break_time())}",
-                       delete_after=self.configuration.long_delete_after_time)
+                       delete_after=new_pomodoro.break_timer.duration.total_seconds())
         await new_pomodoro.break_timer.start()
         await player_cog.ensure_voice(ctx=ctx)
-        await player_cog.play(ctx=ctx, user_input="bamse")
+        await player_cog.play(ctx=ctx, search="bamse")
         await ctx.send(f"Break is over!\n"
                        f"Perhabs time to start a new timer?",
                        delete_after=self.configuration.long_delete_after_time)

@@ -29,26 +29,26 @@ class Player(commands.Cog):
     async def on_ready(self):
         print("Player cog is loaded")
 
+    # Prøv at gøre så vi kune prøver get inde i try og så resten af logikken derude efter. Tror måske det kan løse lidt.
     async def audio_player_task(self):
         while True:
             self.next.clear()
-            try:
-                async with timeout(self.configuration.timeout_time):
-                    current_song = await self.queue.get()
-                    current_song = current_song[1]
-                    self.current_song = current_song
-                    ctx = self.context_list.pop(0)
-                    self.current_context = ctx
-                    async with ctx.typing():
-                        ctx.voice_client.play(current_song.source, after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
-                        await ctx.send(embed=current_song.create_embed(), delete_after=int(current_song.source.duration_int))
-                    await self.next.wait()
-            except asyncio.TimeoutError:
-                print("TimeoutError")
-                if not self.current_context.voice_client.is_playing():
-                    await self.current_context.voice_client.disconnect()
-                    print("Timed out. Leaving!")
-                    return
+            #try:
+            #async with timeout(self.configuration.timeout_time):
+            current_song = await self.queue.get()
+            current_song = current_song[1]
+            self.current_song = current_song
+            ctx = self.context_list.pop(0)
+            self.current_context = ctx
+            async with ctx.typing():
+                ctx.voice_client.play(current_song.source, after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
+                await ctx.send(embed=current_song.create_embed(), delete_after=int(current_song.source.duration_int))
+            await self.next.wait()
+        #except asyncio.TimeoutError:
+            #    print("TimeoutError")
+            #    if not self.current_context.voice_client.is_playing():
+            #        await self.current_context.voice_client.disconnect()
+            #        print("Timed out. Leaving!")
 
     @commands.command()
     async def play(self, ctx: commands.Context, *, search: str):
@@ -59,9 +59,7 @@ class Player(commands.Cog):
                 except Exception as e:
                     print(e)
                 else:  # This way this code is only run if no exceptions WAIT ISNT THIS REALLY STUPID? Just write it after the other things in try. Im so stupid
-                    song = Song(source)
-                    self.context_list.append(ctx)
-                    await self._add_to_queue(song)
+                    await self._insert_next_song_in_queue(ctx, source)
                     await ctx.send(f'Enqueued {str(source)}', delete_after=self.configuration.short_delete_after_time)
             else:
                 try:
@@ -73,28 +71,22 @@ class Player(commands.Cog):
                 else:
                     if ctx.voice_client.is_playing():
                         current_audio_source = ctx.voice_client.source
-                        ctx.voice_client.pause()
-                        song = Song(current_audio_source)
-                        self.context_list.append(ctx)
-                        await self._add_to_queue(song)
-                        song = Song(source)
-                        self.context_list.append(ctx)
-                        await self._add_to_queue(song)
+                        ctx.voice_client.stop()
+                        await self._insert_next_song_in_queue(ctx, source)
+                        await self._insert_next_song_in_queue(ctx, current_audio_source)
                         await ctx.send(f'Enqueued {str(source)}', delete_after=self.configuration.short_delete_after_time)
                         self.next.set()
                     else:
-                        song = Song(source)
-                        self.context_list.append(ctx)
-                        await self._add_to_queue(song)
+                        await self._insert_next_song_in_queue(ctx, source)
                         await ctx.send(f'Enqueued {str(source)}', delete_after=self.configuration.short_delete_after_time)
                         self.next.set()
 
     @staticmethod
-    def _is_url(search):
+    def _is_url(search: str):
         x = urlparse(search)
         return bool(x.scheme)
 
-    async def _add_to_queue(self, source):
+    async def _add_to_queue(self, source):  # source: YTDLSource or MP3Source
         if isinstance(source, YTDLSource):
             await self.queue.put((self.yt_priority, source))
             self.yt_priority += 1
@@ -102,10 +94,15 @@ class Player(commands.Cog):
             await self.queue.put((self.mp3_priority, source))
             self.mp3_priority -= 1
 
+    async def _insert_next_song_in_queue(self, ctx, source):
+        song = Song(source)
+        self.context_list.append(ctx)
+        await self._add_to_queue(song)
+
     @commands.command(brief="Makes the bot join a desired voice channel",
                       help="Defaults to the channel the author is in. "
                            "Can connect to other channels by specifying the channels id after the command ")
-    async def connect(self, ctx, *, channel: discord.VoiceChannel = None):
+    async def connect(self, ctx: commands.Context, *, channel: discord.VoiceChannel = None):
         if not channel and not ctx.author.voice:
             ctx.send("No channel specified and author not in room.", delete_after=self.configuration.short_delete_after_time)
 
@@ -121,31 +118,31 @@ class Player(commands.Cog):
         ctx.voice_state.voice = await destination.connect()
 
     @commands.command(help="Makes the bot leave voice channel")
-    async def stop(self, ctx):
+    async def stop(self, ctx: commands.Context):
         await ctx.voice_client.disconnect()
 
     @commands.command(brief="Pauses the current song")
-    async def pause(self, ctx):
+    async def pause(self, ctx: commands.Context):
         ctx.voice_client.pause()
         await ctx.send("Paused", delete_after=self.configuration.short_delete_after_time)
 
     @commands.command(brief="Resumes the current song")
-    async def resume(self, ctx):
+    async def resume(self, ctx: commands.Context):
         ctx.voice_client.resume()
         await ctx.send("Resumed", delete_after=self.configuration.short_delete_after_time)
 
     @commands.command(brief="Skips to the next audio in the queue")
-    async def skip(self, ctx):
+    async def skip(self, ctx: commands.Context):
         if self.queue:
             ctx.voice_client.stop()
             self.next.set()
             await ctx.send(f"Skipping the current song: {self.current_song.source.title}", delete_after=self.configuration.short_delete_after_time)
         else:
-            ctx.send("Unable to skip. The queue is empty.", delete_after=self.configuration.short_delete_after_time)
+            await ctx.send("Unable to skip. The queue is empty.", delete_after=self.configuration.short_delete_after_time)
 
     @commands.command(brief="Changes the volume the bot is playing", help="I.e. .volume 60 sets the volume to 60%",
-                      aliases=['v'])
-    async def volume(self, ctx, volume: int):
+                      aliases=['v', 'vol'])
+    async def volume(self, ctx: commands.Context, volume: int):
         if ctx.voice_client is None:
             return await ctx.send("Not connected to a voice channel.",
                                   delete_after=self.configuration.short_delete_after_time)
@@ -155,7 +152,7 @@ class Player(commands.Cog):
         await ctx.send(f"Changed volume to {volume}%", delete_after=self.configuration.short_delete_after_time)
 
     @commands.command(help="Shows all the current mp3 files")
-    async def available(self, ctx):
+    async def available(self, ctx: commands.Context):
         available_mp3_files = self._available()
         await ctx.send(available_mp3_files, delete_after=self.configuration.very_long_delete_after_time)
 
@@ -168,7 +165,7 @@ class Player(commands.Cog):
         return available_mp3_files
 
     @commands.command(name="channels", brief="Returns all voice channels with members connected")
-    async def available_channels(self, ctx):
+    async def available_channels(self, ctx: commands.Context):
         embed = self._get_all_channels_with_users_connected()
         await ctx.send(embed=embed, delete_after=self.configuration.very_long_delete_after_time)
 
@@ -187,7 +184,7 @@ class Player(commands.Cog):
         return embed
 
     @play.before_invoke
-    async def ensure_voice(self, ctx):
+    async def ensure_voice(self, ctx: commands.Context):
         if ctx.voice_client is None:
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()
