@@ -5,39 +5,51 @@ from cogs import Pomodoro
 
 
 class TestPomodoro(unittest.TestCase):
-
     def test_PomodoroManager_start_new_pomodoro_name_is_none(self):
-        expected = Pomodoro.PomodoroTimer(category_id=1, work_duration=50, break_duration=10, name=None)
+        expected = Pomodoro.PomodoroTimer(category_id=1, work_duration=datetime.timedelta(minutes=50),
+                                          break_duration=datetime.timedelta(minutes=10), name=None)
         pomodoro_manager = Pomodoro.PomodoroManager()
-        result = pomodoro_manager.start_new_pomodoro(category_id=1, work_duration=50, break_duration=10, name=None)
+        result = pomodoro_manager.start_new_pomodoro(category_id=1, work_duration=datetime.timedelta(minutes=50),
+                                                     break_duration=datetime.timedelta(minutes=10), name=None)
         self.assertEqual(result, expected)
 
     def test_PomodoroManager_start_new_pomodoro_name_is_not_none(self):
-        expected = Pomodoro.PomodoroTimer(category_id=1, work_duration=50, break_duration=10, name="Test")
+        expected = Pomodoro.PomodoroTimer(category_id=1, work_duration=datetime.timedelta(minutes=50),
+                                          break_duration=datetime.timedelta(minutes=10), name="Test")
         pomodoro_manager = Pomodoro.PomodoroManager()
-        result = pomodoro_manager.start_new_pomodoro(category_id=1, work_duration=50, break_duration=10, name="Test")
+        result = pomodoro_manager.start_new_pomodoro(category_id=1, work_duration=datetime.timedelta(minutes=50),
+                                                     break_duration=datetime.timedelta(minutes=10), name="Test")
         self.assertEqual(result, expected)
 
     def test_PomodoroManager_find_pomodoro_timer_name_is_none(self):
-        expected = Pomodoro.PomodoroTimer(category_id=1, work_duration=50, break_duration=10, name=None)
+        expected = Pomodoro.PomodoroTimer(category_id=1, work_duration=datetime.timedelta(minutes=50),
+                                          break_duration=datetime.timedelta(minutes=10), name=None)
         pomodoro_manager = Pomodoro.PomodoroManager()
-        new_pomodoro_timer = pomodoro_manager.start_new_pomodoro(category_id=1, work_duration=50, break_duration=10,
+        new_pomodoro_timer = pomodoro_manager.start_new_pomodoro(category_id=1,
+                                                                 work_duration=datetime.timedelta(minutes=50),
+                                                                 break_duration=datetime.timedelta(minutes=10),
                                                                  name=None)
         result = pomodoro_manager.find_pomodoro_timer(category_id=new_pomodoro_timer.category_id)
         self.assertEqual(result[0], expected)
 
     def test_PomodoroManager_find_pomodoro_timer_name_is_not_none(self):
-        expected = Pomodoro.PomodoroTimer(category_id=1, work_duration=50, break_duration=10, name="Test")
+        expected = Pomodoro.PomodoroTimer(category_id=1, work_duration=datetime.timedelta(minutes=50),
+                                          break_duration=datetime.timedelta(minutes=10), name="Test")
         pomodoro_manager = Pomodoro.PomodoroManager()
-        new_pomodoro_timer = pomodoro_manager.start_new_pomodoro(category_id=1, work_duration=50, break_duration=10,
+        new_pomodoro_timer = pomodoro_manager.start_new_pomodoro(category_id=1,
+                                                                 work_duration=datetime.timedelta(minutes=50),
+                                                                 break_duration=datetime.timedelta(minutes=10),
                                                                  name="Test")
         result = pomodoro_manager.find_pomodoro_timer(name=new_pomodoro_timer.name)
         self.assertEqual(result[0], expected)
 
     def test_PomodoroManager_find_pomodoro_timer_name_and_category_not_none(self):
-        expected = Pomodoro.PomodoroTimer(category_id=1, work_duration=50, break_duration=10, name="Test")
+        expected = Pomodoro.PomodoroTimer(category_id=1, work_duration=datetime.timedelta(minutes=50),
+                                          break_duration=datetime.timedelta(minutes=10), name="Test")
         pomodoro_manager = Pomodoro.PomodoroManager()
-        new_pomodoro_timer = pomodoro_manager.start_new_pomodoro(category_id=1, work_duration=50, break_duration=10,
+        new_pomodoro_timer = pomodoro_manager.start_new_pomodoro(category_id=1,
+                                                                 work_duration=datetime.timedelta(minutes=50),
+                                                                 break_duration=datetime.timedelta(minutes=10),
                                                                  name="Test")
         result = pomodoro_manager.find_pomodoro_timer(category_id=new_pomodoro_timer.category_id,
                                                       name=new_pomodoro_timer.name)
@@ -46,7 +58,9 @@ class TestPomodoro(unittest.TestCase):
     def test_PomodoroManager_find_pomodoro_timer_name_and_category_is_none(self):
         expected = []
         pomodoro_manager = Pomodoro.PomodoroManager()
-        new_pomodoro_timer = pomodoro_manager.start_new_pomodoro(category_id=1, work_duration=50, break_duration=10,
+        new_pomodoro_timer = pomodoro_manager.start_new_pomodoro(category_id=1,
+                                                                 work_duration=datetime.timedelta(minutes=50),
+                                                                 break_duration=datetime.timedelta(minutes=10),
                                                                  name="Test")
         result = pomodoro_manager.find_pomodoro_timer(category_id=None, name=None)
         self.assertEqual(result, expected)
@@ -54,15 +68,20 @@ class TestPomodoro(unittest.TestCase):
     def test_PomodoroManager_find_pomodoro_timer_name_is_not_correct_and_no_category(self):
         expected = []
         pomodoro_manager = Pomodoro.PomodoroManager()
-        new_pomodoro_timer = pomodoro_manager.start_new_pomodoro(category_id=1, work_duration=50, break_duration=10,
+        new_pomodoro_timer = pomodoro_manager.start_new_pomodoro(category_id=1,
+                                                                 work_duration=datetime.timedelta(minutes=50),
+                                                                 break_duration=datetime.timedelta(minutes=10),
                                                                  name="Test")
         result = pomodoro_manager.find_pomodoro_timer(category_id=None, name="test")
         self.assertEqual(result, expected)
 
     def test_PomodoroManager_find_pomodoro_timer_name_is_not_correct_and_category_not_none(self):
-        expected = Pomodoro.PomodoroTimer(category_id=1, work_duration=50, break_duration=10, name="Test")
+        expected = Pomodoro.PomodoroTimer(category_id=1, work_duration=datetime.timedelta(minutes=50),
+                                          break_duration=datetime.timedelta(minutes=10), name="Test")
         pomodoro_manager = Pomodoro.PomodoroManager()
-        new_pomodoro_timer = pomodoro_manager.start_new_pomodoro(category_id=1, work_duration=50, break_duration=10,
+        new_pomodoro_timer = pomodoro_manager.start_new_pomodoro(category_id=1,
+                                                                 work_duration=datetime.timedelta(minutes=50),
+                                                                 break_duration=datetime.timedelta(minutes=10),
                                                                  name="Test")
         result = pomodoro_manager.find_pomodoro_timer(category_id=new_pomodoro_timer.category_id, name="test")
         self.assertEqual(result[0], expected)

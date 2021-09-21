@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import discord
 import datetime
 import asyncio
@@ -16,6 +18,7 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
         self.bot = bot
         self.configuration = bot.get_cog("Configuration")
         self.pomodoro_manager = PomodoroManager()
+        self.player_cog = self.bot.get_cog("Player")
         self.group_size = 3
         self.generel_message_created_at = None
         self.test_created_at = None
@@ -37,16 +40,9 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
 
             elif self._is_category_without_timer(after.channel.category_id, self.configuration.young_guns_category_id):
                 await self._send_pomodoro_reminder_message(self.configuration.young_guns_generel_room_id)
-        '''
-        elif self._is_category_without_timer(after.channel.category_id, 630796890182516737) and \
-                self._has_time_passed(self.test_created_at):
-            print("test3")
-            channel = self.bot.get_channel(630796890182516738)
-            current_message = await channel.send("Pomodoro?", delete_after=10)
-            self.test_created_at = current_message.created_at
-        '''
 
-    def _is_schedule_booked(self):
+    def _is_schedule_booked(self) -> bool:
+        """ Calls the schedule api endpoint and returns true or false based on if the schedule is currently booked """
         response = requests.get(self.configuration.schedule_check_API_LINK)
         if response.status_code == 200:
             if response.content == b'True':
@@ -57,33 +53,29 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
             print("Api did not return status code 200")
             return False
 
-    def _is_category_without_timer(self, after_category_id, category_id):
+    def _is_category_without_timer(self, after_category_id: int, category_id: int) -> bool:
+        """ Returns a bool that says if a category does have a timer currently or not """
         if after_category_id == category_id and self.pomodoro_manager.is_category_without_timer(category_id):
             return True
         else:
             return False
 
-    '''
-    # Hvis jeg ændrer til en anden variabel i delete_after over, så skal det også ændres her.
-    # Kan man ikke få det til at linke sammen? Altså så de bare passer sammen
-    def _has_time_passed(self, created_at):
-        if created_at is None:
-            return True
-        print("I am called")
-        y = datetime.datetime.now() - created_at
-        x = y > 10
-        print(f"x: {x}")
-        return x
-    '''
-
-    async def _send_pomodoro_reminder_message(self, room_id):
+    async def _send_pomodoro_reminder_message(self, room_id: int) -> discord.message:
+        """ Sends a pomodoro reminder message in a channel based on room id and returns the message """
         channel = self.bot.get_channel(room_id)
         message = await channel.send("Did you forget to start a pomodoro?",
                            delete_after=self.configuration.very_long_delete_after_time)
         return message
 
-    @commands.command(aliases=['p', 'po', 'pom', 'pomo', 'pomdro', 'pomdoro'])
-    async def pomodoro(self, ctx, work_length=None, break_length=None, name=None):
+    # Burde man bare her  sige fuck det lorte og så bare tage en ting ind i.e. input, og så på den så fanger vi info ud af den?
+    # Fordi problemet med det her er jo at der findes de her cases
+    # .po 50 10
+    # .po 50 10 "my timer"
+    # .po 50 10  my timer # idk om det her faktisk virker
+    # .po "my timer"
+    # .po my timer # igen uden "" her.
+    @commands.command(aliases=['po', 'pom', 'pomo', 'pomdro', 'pomdoro'])
+    async def pomodoro(self, ctx, work_length=None, break_length=None, name: str = None) -> None:
         # Temporary fix
         # This is done to be able to use the command with the syntax .po mytimer
         # and it would accept it as name mytimer with your default preferred timers.
@@ -93,7 +85,6 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
                 name = work_length
                 work_length = None
 
-        player_cog = self.bot.get_cog("Player")
         if work_length is None or break_length is None:
             work_length, break_length = self._get_work_break_length(ctx.message.author.id)
 
@@ -110,16 +101,16 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
                        f"Break ends at: {self._to_string_format(new_pomodoro.get_end_break_time())}\n",
                        delete_after=new_pomodoro.total_time.total_seconds())
         await new_pomodoro.work_timer.start()
-        await player_cog.ensure_voice(ctx=ctx)
-        await player_cog.play(ctx=ctx, search="bamse")
+        await self.player_cog.ensure_voice(ctx=ctx)
+        await self.player_cog.play(ctx=ctx, search="bamse")
 
         await ctx.send(f"Work is over!\n"
                        f"Kick back, relax, and grab yourself a beverage!\n"
                        f"Break ends at {self._to_string_format(new_pomodoro.get_end_break_time())}",
                        delete_after=new_pomodoro.break_timer.duration.total_seconds())
         await new_pomodoro.break_timer.start()
-        await player_cog.ensure_voice(ctx=ctx)
-        await player_cog.play(ctx=ctx, search="bamse")
+        await self.player_cog.ensure_voice(ctx=ctx)
+        await self.player_cog.play(ctx=ctx, search="bamse")
         await ctx.send(f"Break is over!\n"
                        f"Perhabs time to start a new timer?",
                        delete_after=self.configuration.long_delete_after_time)
@@ -128,20 +119,24 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
                               new_pomodoro.work_timer.starting_time)
 
     @staticmethod
-    def _get_work_break_length(author_id):
+    def _get_work_break_length(author_id: int) -> Tuple[int, int]:
+        """ Gets the work and break length from the db based on the authors id and returns tuple with lengths """
         user = Db.get_user_by_id(author_id)
         return user.preferred_work_timer, user.preferred_break_timer
 
     @staticmethod
-    def _to_minutes(timedelta):
+    def _to_minutes(timedelta: datetime.timedelta) -> float:
+        """ Returns the amount of minutes left based on the time delta """
         return timedelta.total_seconds() / CONSTANT_SECONDS_IN_A_MINUTE
 
     @staticmethod
-    def _to_string_format(time):
+    def _to_string_format(time: datetime) -> str:
+        """ Returns the time in a formatted string """
         return time.strftime("%H:%M:%S")
 
     @commands.command(name="changeDefault", brief=".default 25 5 e.g.", aliases=['default', 'changedefault', 'change'])
-    async def change_default(self, ctx, preferred_work_timer=None, preferred_break_timer=None):
+    async def change_default(self, ctx: commands.Context, preferred_work_timer: int = None, preferred_break_timer: int = None) -> None:
+        """ Updates the users default preferences for timers """
         if preferred_work_timer is None or preferred_break_timer is None:
             preferred_work_timer, preferred_break_timer = Db.get_preferred_work_and_break_timer(ctx.message.author.id)
             await ctx.send(f"Please specify both preferred work length and break length. Your current defaults are: "
@@ -153,7 +148,8 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
                            delete_after=self.configuration.short_delete_after_time)
 
     @commands.command(name="time")
-    async def get_remaining_time(self, ctx, name=None):
+    async def get_remaining_time(self, ctx: commands.Context, name: str = None) -> None:
+        """ Gets the remaining time of a timer based on either name or category and sends it to the user """
         if name is not None:
             timer = self.pomodoro_manager.find_pomodoro_timer(name=name)
         else:
@@ -171,7 +167,8 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
                                delete_after=self.configuration.medium_delete_after_time)
 
     @staticmethod
-    def _timedelta_to_string_format(time_delta):
+    def _timedelta_to_string_format(time_delta: datetime.timedelta) -> str:
+        """ Returns the timedelta object and returns it into a formatted string """
         hours = 0
         minutes = 0
         remaining_time_in_seconds = time_delta.total_seconds()
@@ -190,22 +187,26 @@ def setup(bot):
 
 
 class Timer:
+    """ A single timer that has the responsibility of sleeping for the desired amount """
     def __init__(self, duration: datetime.timedelta):
         self.duration = duration
-        self.starting_time = None
-        self.end_time = None
+        self.starting_time = datetime
+        self.end_time = datetime
 
-    async def start(self):
+    async def start(self) -> None:
+        """ Starts the timer and sleeps for the duration that is specified """
         self.starting_time = datetime.datetime.now()
         self.end_time = self.starting_time + self.duration
         await asyncio.sleep(self.duration.total_seconds())
 
-    def get_remaining_time(self):
+    def get_remaining_time(self) -> datetime.timedelta:
+        """ Gets the remaining time of the timer and returns a timedelta object """
         return self.duration - (datetime.datetime.now() - self.starting_time)
 
 
 class PomodoroTimer:
-    def __init__(self, category_id, work_duration, break_duration, name=None):
+    """ A single pomodoro timer that encapsulates both the work timer and break timer """
+    def __init__(self, category_id: int, work_duration: datetime.timedelta, break_duration: datetime.timedelta, name=None):
         self.category_id = category_id
         self.work_timer = Timer(work_duration)
         self.break_timer = Timer(break_duration)
@@ -213,16 +214,19 @@ class PomodoroTimer:
         self.total_time = self.work_timer.duration + self.break_timer.duration
         self.starting_time = datetime.datetime.now()
 
-    def get_end_work_time(self):
+    def get_end_work_time(self) -> datetime:
+        """ Gets the datetime object of the time when the work period is over """
         return self.starting_time + self.work_timer.duration
 
-    def get_end_break_time(self):
+    def get_end_break_time(self) -> datetime:
+        """ Gets the datetime object of the time when the break period is over """
         return self.starting_time + self.work_timer.duration + self.break_timer.duration
 
-    def is_work_over(self):
+    def is_work_over(self) -> bool:
+        """ Returns a bool that says if the current time is after the work period """
         return datetime.datetime.now() > (self.work_timer.starting_time + self.work_timer.duration)
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
         return isinstance(other, PomodoroTimer) and \
                other.category_id == self.category_id and \
                other.work_timer.duration == self.work_timer.duration and \
@@ -231,24 +235,30 @@ class PomodoroTimer:
 
 
 class PomodoroManager:
+    """ Manages all pomodoro timers """
     def __init__(self):
-        self._list_of_pomodoros = []
+        self._list_of_pomodoro_timers = []
 
-    def start_new_pomodoro(self, category_id, work_duration, break_duration, name=None):
+    def start_new_pomodoro(self, category_id: int, work_duration: datetime.timedelta, break_duration: datetime.timedelta, name=None) -> PomodoroTimer:
+        """ Creates a new pomodoro timer and adds it to the list of current running timers """
         new_pomodoro = PomodoroTimer(category_id, work_duration, break_duration, name)
-        self._list_of_pomodoros.append(new_pomodoro)
+        self._list_of_pomodoro_timers.append(new_pomodoro)
         return new_pomodoro
 
-    def find_pomodoro_timer(self, name=None, category_id=None):
-        return [e for e in self._list_of_pomodoros if
+    def find_pomodoro_timer(self, name: str = None, category_id: int = None) -> [PomodoroTimer]:
+        """ Finds a pomodoro either by name or category id.
+            Returns a list of pomodoro timers that match or None if no timers match """
+        return [e for e in self._list_of_pomodoro_timers if
                 (e.name == name and name is not None) or e.category_id == category_id]
 
-    def is_list_of_pomodoros_empty(self):
-        return not self._list_of_pomodoros
+    def is_list_of_pomodoros_empty(self) -> bool:
+        """ Returns whether the current list of Pomodoro timers is empty, i.e. does any timers exist? """
+        return not self._list_of_pomodoro_timers
 
     # Kan det her one lines?
-    def is_category_without_timer(self, category_id):
-        timers_attached_to_category = [e for e in self._list_of_pomodoros if (e.category_id == category_id)]
+    def is_category_without_timer(self, category_id: int) -> bool:
+        """ Returns a True if a category (as in Discord category on a server) does not a timer currently running """
+        timers_attached_to_category = [e for e in self._list_of_pomodoro_timers if (e.category_id == category_id)]
         if not timers_attached_to_category:
             return True
         else:

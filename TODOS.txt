@@ -14,6 +14,10 @@
         Maybe?
 
     Load timers from db!
+    .addsource
+        Adds source to zotero or bib file.
+
+    Erstart gif med billede når roulette har kørt.
 
 
 # IDEAS - Basicly backlog I suppose

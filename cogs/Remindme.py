@@ -19,6 +19,13 @@ class Remindme(commands.Cog):
         print("Remindme cog is loaded")
 
     @commands.command()
+    async def remindme_time(self, ctx, time, *, message):
+        #reminder_old = reminder_old(time, message, ctx.message.author)
+        return None
+
+
+
+    @commands.command()
     async def remindme(self, ctx, time, *, message):
         author = ctx.message.author
 
@@ -89,8 +96,8 @@ class ReminderManager:
         return message
 
 
-class reminder:
-    def __init__(self, time: datetime, text: str, user, ):
+class reminder_old:
+    def __init__(self, time: str, text: str):
         print(time)
         self.time = time
         self.text = text

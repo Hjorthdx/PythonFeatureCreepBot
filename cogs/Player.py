@@ -104,11 +104,12 @@ class Player(commands.Cog):
                            "Can connect to other channels by specifying the channels id after the command ")
     async def connect(self, ctx: commands.Context, *, channel: discord.VoiceChannel = None):
         if not channel and not ctx.author.voice:
-            ctx.send("No channel specified and author not in room.", delete_after=self.configuration.short_delete_after_time)
+            await ctx.send("No channel specified and author not in room.",
+                           delete_after=self.configuration.short_delete_after_time)
 
         if not channel and not ctx.author.voice:
-            ctx.send("No channel specified and author not in room.",
-                     delete_after=self.configuration.short_delete_after_time)
+            await ctx.send("No channel specified and author not in room.",
+                           delete_after=self.configuration.short_delete_after_time)
 
         destination = channel or ctx.author.voice.channel
         if ctx.voice_state.voice:
