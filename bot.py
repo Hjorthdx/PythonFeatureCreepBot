@@ -41,7 +41,7 @@ async def on_command_completion(ctx):
 @bot.event
 async def on_command_error(ctx, error):
     print(error)
-    await ctx.send(":snake: ERROR! :snake:", delete_after=15)
+    await ctx.send(f":snake: ERROR! :snake:\n The error: {error}", delete_after=15)
 
 
 for filename in os.listdir('C:/Users/Sren/PycharmProjects/DiscordFeatureCreepBot/cogs/'):
