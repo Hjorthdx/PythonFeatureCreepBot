@@ -1,5 +1,4 @@
 from typing import Tuple
-
 import discord
 import datetime
 import asyncio
@@ -12,15 +11,15 @@ CONSTANT_SECONDS_IN_A_MINUTE = 60
 
 
 class PomodoroCog(commands.Cog, name="Pomodoro"):
-    # Some documentation
+    """ Pomodoro cog that is responsible for handling user inputs """
 
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: discord.client = bot
         self.configuration = bot.get_cog("Configuration")
-        self.pomodoro_manager = PomodoroManager()
         self.player_cog = self.bot.get_cog("Player")
-        self.group_size = 6
-        self.reminder_message_id = 0  # Måske none prøv lige at teste med det der
+        self.pomodoro_manager: PomodoroManager = PomodoroManager()
+        self.group_size: int = 6
+        self.reminder_message_id: int = 0  # Måske none prøv lige at teste med det der
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -93,8 +92,8 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
         if work_length is None or break_length is None:
             work_length, break_length = self._get_work_break_length(ctx.message.author.id)
 
-        work_duration = datetime.timedelta(minutes=work_length)
-        break_duration = datetime.timedelta(minutes=break_length)
+        work_duration = datetime.timedelta(minutes=int(work_length))
+        break_duration = datetime.timedelta(minutes=int(break_length))
 
         new_pomodoro = self.pomodoro_manager.start_new_pomodoro(ctx.message.channel.category_id, work_duration,
                                                                 break_duration, name)
