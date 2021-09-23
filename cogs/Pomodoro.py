@@ -19,27 +19,32 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
         self.configuration = bot.get_cog("Configuration")
         self.pomodoro_manager = PomodoroManager()
         self.player_cog = self.bot.get_cog("Player")
-        self.group_size = 3
-        self.generel_message_created_at = None
-        self.test_created_at = None
+        self.group_size = 6
+        self.reminder_message_id = 0  # Måske none prøv lige at teste med det der
 
     @commands.Cog.listener()
     async def on_ready(self):
         print("Pomodoro cog is loaded")
 
     @commands.Cog.listener()
-    async def on_voice_state_update(self, member, before, after):
-        #if after.channel is None or self._is_schedule_booked():
-        #    return
-        if len(after.channel.members) == self.group_size and before is None:
-            if self._is_category_without_timer(after.channel.category_id, self.configuration.project_category_id):
-                reminder_message = await self._send_pomodoro_reminder_message(self.configuration.generel_room_id)
+    async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState) -> None:
+        if not self._is_pomodoro_ready(before, after):
+            return None
 
-            elif self._is_category_without_timer(after.channel.category_id, self.configuration.pensionist_category_id):
-                await self._send_pomodoro_reminder_message(self.configuration.pensionist_generel_room_id)
+        channel = self.bot.get_channel(self.configuration.p7_generel_room_id)
+        try:
+            message = await channel.fetch_message(self.reminder_message_id)
+            return None
+        except discord.NotFound as error:
+            reminder_message = await self._send_pomodoro_reminder_message(self.configuration.p7_generel_room_id)
+            self.reminder_message_id = reminder_message.id
 
-            elif self._is_category_without_timer(after.channel.category_id, self.configuration.young_guns_category_id):
-                await self._send_pomodoro_reminder_message(self.configuration.young_guns_generel_room_id)
+    def _is_pomodoro_ready(self, before: discord.VoiceState, after: discord.VoiceState) -> bool:
+        return after.channel is not None or \
+                not self._is_schedule_booked() or \
+                before.channel is None or \
+                len(after.channel.members) >= self.group_size or \
+                self.pomodoro_manager.is_category_without_timer(self.configuration.p7_category_id)
 
     def _is_schedule_booked(self) -> bool:
         """ Calls the schedule api endpoint and returns true or false based on if the schedule is currently booked """
@@ -64,7 +69,7 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
         """ Sends a pomodoro reminder message in a channel based on room id and returns the message """
         channel = self.bot.get_channel(room_id)
         message = await channel.send("Did you forget to start a pomodoro?",
-                           delete_after=self.configuration.very_long_delete_after_time)
+                                     delete_after=self.configuration.very_long_delete_after_time)
         return message
 
     # Burde man bare her  sige fuck det lorte og så bare tage en ting ind i.e. input, og så på den så fanger vi info ud af den?
@@ -88,8 +93,8 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
         if work_length is None or break_length is None:
             work_length, break_length = self._get_work_break_length(ctx.message.author.id)
 
-        work_duration = datetime.timedelta(minutes=int(work_length))
-        break_duration = datetime.timedelta(minutes=int(break_length))
+        work_duration = datetime.timedelta(minutes=work_length)
+        break_duration = datetime.timedelta(minutes=break_length)
 
         new_pomodoro = self.pomodoro_manager.start_new_pomodoro(ctx.message.channel.category_id, work_duration,
                                                                 break_duration, name)
@@ -135,7 +140,8 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
         return time.strftime("%H:%M:%S")
 
     @commands.command(name="changeDefault", brief=".default 25 5 e.g.", aliases=['default', 'changedefault', 'change'])
-    async def change_default(self, ctx: commands.Context, preferred_work_timer: int = None, preferred_break_timer: int = None) -> None:
+    async def change_default(self, ctx: commands.Context, preferred_work_timer: int = None,
+                             preferred_break_timer: int = None) -> None:
         """ Updates the users default preferences for timers """
         if preferred_work_timer is None or preferred_break_timer is None:
             preferred_work_timer, preferred_break_timer = Db.get_preferred_work_and_break_timer(ctx.message.author.id)
@@ -188,6 +194,7 @@ def setup(bot):
 
 class Timer:
     """ A single timer that has the responsibility of sleeping for the desired amount """
+
     def __init__(self, duration: datetime.timedelta):
         self.duration = duration
         self.starting_time = datetime
@@ -206,7 +213,9 @@ class Timer:
 
 class PomodoroTimer:
     """ A single pomodoro timer that encapsulates both the work timer and break timer """
-    def __init__(self, category_id: int, work_duration: datetime.timedelta, break_duration: datetime.timedelta, name=None):
+
+    def __init__(self, category_id: int, work_duration: datetime.timedelta, break_duration: datetime.timedelta,
+                 name=None):
         self.category_id = category_id
         self.work_timer = Timer(work_duration)
         self.break_timer = Timer(break_duration)
@@ -236,10 +245,12 @@ class PomodoroTimer:
 
 class PomodoroManager:
     """ Manages all pomodoro timers """
+
     def __init__(self):
         self._list_of_pomodoro_timers = []
 
-    def start_new_pomodoro(self, category_id: int, work_duration: datetime.timedelta, break_duration: datetime.timedelta, name=None) -> PomodoroTimer:
+    def start_new_pomodoro(self, category_id: int, work_duration: datetime.timedelta,
+                           break_duration: datetime.timedelta, name=None) -> PomodoroTimer:
         """ Creates a new pomodoro timer and adds it to the list of current running timers """
         new_pomodoro = PomodoroTimer(category_id, work_duration, break_duration, name)
         self._list_of_pomodoro_timers.append(new_pomodoro)

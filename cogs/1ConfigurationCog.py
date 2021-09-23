@@ -22,17 +22,9 @@ class Configuration(commands.Cog):
         self.schedule_check_API_LINK = os.getenv("SCHEDULE_CHECK_API")
         self.timeout_time = 60
 
-        # Fælles
-        self.project_category_id = 619095311079571466
-        self.generel_room_id = 619094316106907660
-
-        # Pensionist
-        self.pensionist_generel_room_id = 807166593570308126
-        self.pensionist_category_id = 807166232943656980
-
-        # Young guns
-        self.young_guns_generel_room_id = 807166921417424896
-        self.young_guns_category_id = 807166416657580073
+        # P7
+        self.p7_generel_room_id = 885155224489197573
+        self.p7_category_id = 630796890182516737
 
     @commands.Cog.listener()
     async def on_ready(self):

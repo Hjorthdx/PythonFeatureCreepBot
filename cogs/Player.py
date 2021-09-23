@@ -107,16 +107,8 @@ class Player(commands.Cog):
             await ctx.send("No channel specified and author not in room.",
                            delete_after=self.configuration.short_delete_after_time)
 
-        if not channel and not ctx.author.voice:
-            await ctx.send("No channel specified and author not in room.",
-                           delete_after=self.configuration.short_delete_after_time)
-
         destination = channel or ctx.author.voice.channel
-        if ctx.voice_state.voice:
-            await ctx.voice.voice.move_to(destination)
-            return
-
-        ctx.voice_state.voice = await destination.connect()
+        await destination.connect()
 
     @commands.command(help="Makes the bot leave voice channel")
     async def stop(self, ctx: commands.Context):
@@ -167,12 +159,12 @@ class Player(commands.Cog):
 
     @commands.command(name="channels", brief="Returns all voice channels with members connected")
     async def available_channels(self, ctx: commands.Context):
-        embed = self._get_all_channels_with_users_connected()
+        embed = self._get_all_channels_with_users_connected(ctx.guild.id)
         await ctx.send(embed=embed, delete_after=self.configuration.very_long_delete_after_time)
 
-    def _get_all_channels_with_users_connected(self):
+    def _get_all_channels_with_users_connected(self, guild_id: int):
         embed = discord.Embed(title="Voice channels with members connected")
-        guild = self.bot.get_guild(self.configuration.guild_id)
+        guild = self.bot.get_guild(guild_id)
         for channel in guild.channels:
             if isinstance(channel, discord.VoiceChannel):
                 if channel.members:
@@ -181,7 +173,7 @@ class Player(commands.Cog):
                         members_string += f'{member.name}\n'
                     embed.add_field(name=f'**{channel.name}**',
                                     value=f'>ID: {channel.id}\n'
-                                          f'>Members: {members_string}\n')
+                                          f'>Members: \n{members_string}\n')
         return embed
 
     @play.before_invoke
