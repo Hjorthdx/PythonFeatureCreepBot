@@ -39,10 +39,10 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
             self.reminder_message_id = reminder_message.id
 
     def _is_pomodoro_ready(self, before: discord.VoiceState, after: discord.VoiceState) -> bool:
-        return after.channel is not None or \
-                not self._is_schedule_booked() or \
-                before.channel is None or \
-                len(after.channel.members) >= self.group_size or \
+        return after.channel is not None and \
+                not self._is_schedule_booked() and \
+                before.channel is None and \
+                len(after.channel.members) >= self.group_size and \
                 self.pomodoro_manager.is_category_without_timer(self.configuration.p7_category_id)
 
     def _is_schedule_booked(self) -> bool:
