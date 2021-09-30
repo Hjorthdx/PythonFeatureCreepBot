@@ -24,7 +24,7 @@ class Configuration(commands.Cog):
 
         # P7
         self.p7_generel_room_id = 885155224489197573
-        self.p7_category_id = 630796890182516737
+        self.p7_category_id = 885155224933761044
 
     @commands.Cog.listener()
     async def on_ready(self):

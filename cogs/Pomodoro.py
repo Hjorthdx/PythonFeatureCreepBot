@@ -113,6 +113,7 @@ class PomodoroCog(commands.Cog, name="Pomodoro"):
                        f"Break ends at {self._to_string_format(new_pomodoro.get_end_break_time())}",
                        delete_after=new_pomodoro.break_timer.duration.total_seconds())
         await new_pomodoro.break_timer.start()
+
         await self.player_cog.ensure_voice(ctx=ctx)
         await self.player_cog.play(ctx=ctx, search="bamse")
         await ctx.send(f"Break is over!\n"

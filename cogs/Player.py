@@ -1,3 +1,5 @@
+import threading
+
 import discord
 import os
 import asyncio
@@ -21,10 +23,11 @@ class Player(commands.Cog):
         self.current_song: typing.Optional[typing.Union[YTDLSource, MP3Source]] = None
         self.next: asyncio.Event = asyncio.Event()
         self.bot.loop.create_task(self.audio_player_task())
+        self._is_paused : bool = False
 
         # Magic values right now. Should be set to something else. Just this for now while testing.
-        self.mp3_priority: int = 20
-        self.yt_priority: int = 0
+        self.mp3_priority: int = 10000
+        self.yt_priority: int = 100000
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -34,23 +37,16 @@ class Player(commands.Cog):
     async def audio_player_task(self) -> None:
         """ A infinite loop that handles actually playing the next song in the queue """
         while True:
-            self.next.clear()
-            #try:
-            #async with timeout(self.configuration.timeout_time):
             current_song = await self.queue.get()
             current_song = current_song[1]
             self.current_song = current_song
             ctx = self.context_list.pop(0)
             self.current_context = ctx
             async with ctx.typing():
-                ctx.voice_client.play(current_song.source, after=lambda e: self.bot.loop.call_soon_threadsafe(self.next.set))
+                ctx.voice_client.play(current_song.source)
                 await ctx.send(embed=current_song.create_embed(), delete_after=int(current_song.source.duration_int))
-            await self.next.wait()
-        #except asyncio.TimeoutError:
-            #    print("TimeoutError")
-            #    if not self.current_context.voice_client.is_playing():
-            #        await self.current_context.voice_client.disconnect()
-            #        print("Timed out. Leaving!")
+            while ctx.voice_client.is_playing():
+                await asyncio.sleep(5)
 
     @commands.command()
     async def play(self, ctx: commands.Context, *, search: str) -> None:
@@ -66,25 +62,24 @@ class Player(commands.Cog):
                     await ctx.send(f'Enqueued {str(source)}', delete_after=self.configuration.short_delete_after_time)
             else:
                 try:
+                    # Error handling så den ikke bare æder alle strings :o)
+                    # Måske lidt trim og sådan noget fint noget.
                     mp3_path = self.configuration.mp3_folder_path + search + ".mp3"
                     source = await MP3Source.create_source(ctx, mp3_path, title=search)
                 except Exception as e:
-                    print("Not url or mp3")
                     print(e)
                 else:
                     if ctx.voice_client.is_playing():
                         current_audio_source = ctx.voice_client.source
-                        ctx.voice_client.stop()
-                        await self._insert_next_song_in_queue(ctx, source)
+                        ctx.voice_client.pause()
                         await self._insert_next_song_in_queue(ctx, current_audio_source)
+                        await self._insert_next_song_in_queue(ctx, source)
                         await ctx.send(f'Enqueued {str(source)}',
                                        delete_after=self.configuration.short_delete_after_time)
-                        self.next.set()
                     else:
                         await self._insert_next_song_in_queue(ctx, source)
                         await ctx.send(f'Enqueued {str(source)}',
                                        delete_after=self.configuration.short_delete_after_time)
-                        self.next.set()
 
     @staticmethod
     def _is_url(search: str) -> bool:
@@ -93,13 +88,13 @@ class Player(commands.Cog):
         return bool(x.scheme)
 
     # Do something about no type hint here for source
-    async def _add_to_queue(self, source) -> None:  # source: YTDLSource or MP3Source
+    async def _add_to_queue(self, song) -> None:  # source: YTDLSource or MP3Source
         """ Determines where in the queue the current source should be placed and places it into the queue """
-        if isinstance(source, YTDLSource):
-            await self.queue.put((self.yt_priority, source))
-            self.yt_priority += 1
+        if isinstance(song.source, YTDLSource):
+            await self.queue.put((self.yt_priority, song))
+            self.yt_priority -= 1
         else:
-            await self.queue.put((self.mp3_priority, source))
+            await self.queue.put((self.mp3_priority, song))
             self.mp3_priority -= 1
 
     async def _insert_next_song_in_queue(self, ctx, source) -> None:
@@ -125,24 +120,25 @@ class Player(commands.Cog):
         """ Makes the bot disconnect from the voice channel """
         await ctx.voice_client.disconnect()
 
-    @commands.command(brief="Pauses the current song")
-    async def pause(self, ctx: commands.Context) -> None:
-        """ Makes the bot pause the currently playing song """
-        ctx.voice_client.pause()
-        await ctx.send("Paused", delete_after=self.configuration.short_delete_after_time)
+    # De her virker ikke pt fordi pause jo nu bliver brugt deroppe i det der andet noget.
+    # Måske bare lige en bette bool ? :o)
+    #@commands.command(brief="Pauses the current song")
+    #async def pause(self, ctx: commands.Context) -> None:
+    #    """ Makes the bot pause the currently playing song """
+    #    ctx.voice_client.pause()
+    #    await ctx.send("Paused", delete_after=self.configuration.short_delete_after_time)
 
-    @commands.command(brief="Resumes the current song")
-    async def resume(self, ctx: commands.Context) -> None:
-        """ Makes the bot resume playing from a paused state """
-        ctx.voice_client.resume()
-        await ctx.send("Resumed", delete_after=self.configuration.short_delete_after_time)
+    #@commands.command(brief="Resumes the current song")
+    #async def resume(self, ctx: commands.Context) -> None:
+    #    """ Makes the bot resume playing from a paused state """
+    #    ctx.voice_client.resume()
+    #    await ctx.send("Resumed", delete_after=self.configuration.short_delete_after_time)
 
     @commands.command(brief="Skips to the next audio in the queue")
     async def skip(self, ctx: commands.Context) -> None:
         """ Skips the currently playing song in the queue and starts playing the next song """
         if self.queue:
             ctx.voice_client.stop()
-            self.next.set()
             await ctx.send(f"Skipping the current song: {self.current_song.source.title}",
                            delete_after=self.configuration.short_delete_after_time)
         else:
@@ -265,7 +261,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.title: str = data.get('title')
         self.thumbnail: str = data.get('thumbnail')
         self.description: str = data.get('description')
-        self.duration: str = self._parse_duration(int(data.get('duration')))
+        self.duration: str = self._parse_duration(int(data.get('duration'))) # Tror den her fucker op hvis det er en live stream.
         self.duration_int: int = int(data.get('duration'))
         self.url: str = data.get('webpage_url')
         self.stream_url: str = data.get('url')
