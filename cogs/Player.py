@@ -1,5 +1,3 @@
-import threading
-
 import discord
 import os
 import asyncio
@@ -33,7 +31,6 @@ class Player(commands.Cog):
     async def on_ready(self):
         print("Player cog is loaded")
 
-    # Prøv at gøre så vi kune prøver get inde i try og så resten af logikken derude efter. Tror måske det kan løse lidt.
     async def audio_player_task(self) -> None:
         """ A infinite loop that handles actually playing the next song in the queue """
         while True:
@@ -62,12 +59,16 @@ class Player(commands.Cog):
                     await ctx.send(f'Enqueued {str(source)}', delete_after=self.configuration.short_delete_after_time)
             else:
                 try:
-                    # Error handling så den ikke bare æder alle strings :o)
-                    # Måske lidt trim og sådan noget fint noget.
-                    mp3_path = self.configuration.mp3_folder_path + search + ".mp3"
-                    source = await MP3Source.create_source(ctx, mp3_path, title=search)
+                    search_without_spaces = search.replace(" ", "")
+                    source = None
+                    for filename in os.listdir(self.configuration.mp3_folder_path):
+                        if search_without_spaces in filename:
+                            mp3_path = self.configuration.mp3_folder_path + filename
+                            source = await MP3Source.create_source(ctx, mp3_path, title=filename)
                 except Exception as e:
                     print(e)
+                    await ctx.send(f"Sorry couldn't find any file with {search} in the name",
+                                   delete_after=self.configuration.short_delete_after_time)
                 else:
                     if ctx.voice_client.is_playing():
                         current_audio_source = ctx.voice_client.source
@@ -80,6 +81,8 @@ class Player(commands.Cog):
                         await self._insert_next_song_in_queue(ctx, source)
                         await ctx.send(f'Enqueued {str(source)}',
                                        delete_after=self.configuration.short_delete_after_time)
+
+
 
     @staticmethod
     def _is_url(search: str) -> bool:
